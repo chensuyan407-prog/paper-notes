@@ -1,0 +1,71 @@
+{
+ "n_items": 37,
+ "n_verified": 37,
+ "n_needs_review": 0,
+ "n_failed": 0,
+ "section_coverage": {
+  "required": 7,
+  "covered": 7,
+  "missing": []
+ },
+ "unknown_section_ids_in_draft": [],
+ "card_missing": [],
+ "knowledge_merges": [
+  {
+   "merged": "batch normalization",
+   "into": "BN"
+  }
+ ],
+ "outline_fixes": [
+  {
+   "section": "s3",
+   "fix": "rejected junk heading '1 N' (merged into previous section)"
+  },
+  {
+   "section": "s4",
+   "fix": "rejected junk heading '1 N' (merged into previous section)"
+  },
+  {
+   "section": "sx1",
+   "fix": "recovered heading '2 Towards Reducing Internal Covariate Shift' at p2-b7"
+  },
+  {
+   "section": "sx2",
+   "fix": "recovered heading '3 Normalization via Mini-Batch Statistics' at p3-b9"
+  },
+  {
+   "section": "sx3",
+   "fix": "recovered heading '3.1 Training and Inference with Batch- Normalized Networks' at p4-b44"
+  },
+  {
+   "section": "sx4",
+   "fix": "recovered heading '3.2 Batch-Normalized Convolutional Networks' at p4-b96"
+  },
+  {
+   "section": "sx5",
+   "fix": "recovered heading '3.3 Batch Normalization enables higher learning rates' at p5-b8"
+  },
+  {
+   "section": "sx6",
+   "fix": "recovered heading '3.4 Batch Normalization regularizes the model' at p5-b22"
+  }
+ ],
+ "failed_items": [],
+ "review_items": [],
+ "machine_checkable": [
+  "anchor exists",
+  "quote verbatim in cited block (or relocated)",
+  "anchor page/section",
+  "numbers in note appear in anchored text",
+  "section coverage/order",
+  "card fields present",
+  "duplicate knowledge points merged",
+  "abbreviation expansion printed"
+ ],
+ "human_review": [
+  "note is a faithful paraphrase of its quote",
+  "figure/page-image readings",
+  "fuzzy quotes",
+  "completeness of limitations/conditions"
+ ]
+}

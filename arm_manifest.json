@@ -1,0 +1,93 @@
+{
+ "arm_version": "1.1",
+ "paper": {
+  "title": "阅读10｜文献总结与结构化笔记 — paper-notes Skill",
+  "challenge_id": "product-arena-06-6d8cf72b"
+ },
+ "entrypoint": "src/reproduce.py",
+ "environment": {
+  "dependencies": "requirements.txt",
+  "python_version": ">=3.9",
+  "gpu_required": false,
+  "extra_packages": [
+   "PyMuPDF>=1.23",
+   "numpy",
+   "tesseract (optional, scanned pages)"
+  ]
+ },
+ "execution": {
+  "log_path": "execution/run.log",
+  "exit_code": 0,
+  "ran_at": "2026-11-22T09:45:37Z",
+  "ran_by": "agent",
+  "artifacts": [
+   {
+    "id": "metrics",
+    "path": "execution/results/metrics.json",
+    "type": "metric",
+    "format": "json",
+    "checksum_sha256": "e0e93bc298c3435b3bd2a7a8e34dfcafa804cfce04c7324a1a885eae868023e2"
+   },
+   {
+    "id": "example_bn_result",
+    "path": "execution/results/example_bn_dev/result.json",
+    "type": "data",
+    "format": "json",
+    "checksum_sha256": "c00c298b24621dbbdbbd77ef51cea965d71f7f9d125a31ffe90df1068f76b1a3"
+   },
+   {
+    "id": "example_bn_notes",
+    "path": "execution/results/example_bn_dev/notes.md",
+    "type": "data",
+    "format": "other",
+    "checksum_sha256": "7d5db0468756fd8fe28b1d3151cfe4c8863bf2e6c7babc9b4f3e695d48728dd8"
+   },
+   {
+    "id": "example_bn_verification",
+    "path": "execution/results/example_bn_dev/verification.json",
+    "type": "data",
+    "format": "json",
+    "checksum_sha256": "570a9a1a62a239a53a5b9644fc91a370a0eec989b67c73dfeedfb87f056de970"
+   },
+   {
+    "id": "example_bn_card",
+    "path": "execution/results/example_bn_dev/paper_card.csv",
+    "type": "table",
+    "format": "csv",
+    "checksum_sha256": "756b17d78aafaff84e81612b43b5c96ad4ca9b721da60fbacfcdea0bbf093ecd"
+   },
+   {
+    "id": "skill",
+    "path": "submission/SKILL.md",
+    "type": "data",
+    "format": "other",
+    "checksum_sha256": "b62353051e044fa302fe11fed560772b2198a20016e7c621bb8a164a9e78e643"
+   }
+  ]
+ },
+ "expected_outputs": [
+  {
+   "name": "self-test expectations met (28/28)",
+   "type": "metric",
+   "produced_by": [
+    "metrics"
+   ],
+   "comparison_method": "exact_match"
+  },
+  {
+   "name": "dev example: notes items verified against PDF (37/37)",
+   "type": "data",
+   "produced_by": [
+    "example_bn_verification"
+   ],
+   "comparison_method": "exact_match"
+  }
+ ],
+ "handoff": {
+  "status": "partial",
+  "next_suggestion": "platform A/B on the 3 fixed cases; publish GitHub repo",
+  "hypothesis": "block-level anchors + automatic quote/number/section checks raise correctness and verifiability of paper notes vs a base agent"
+ },
+ "characterization": "characterization.json",
+ "trace": "trace/trace.jsonl"
+}

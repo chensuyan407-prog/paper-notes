@@ -1,0 +1,38 @@
+{
+ "self_test": {
+  "passed": 28,
+  "total": 28,
+  "exit_code": 0,
+  "lines": [
+   "PASS  outline_headings                         expected=['1 Introduction', '2 Method', '2.1 Reading order', '3 Results', 'References'] actual=['1 Introduction', '2 Method', '2.1 Reading order', '3 Results', 'References'] ",
+   "PASS  good_block_quote                         expected=verified       actual=verified       ",
+   "PASS  good_table_row                           expected=verified       actual=verified       ",
+   "PASS  quote_across_column_break                expected=verified       actual=verified       ",
+   "PASS  fabricated_quote                         expected=failed         actual=failed         ",
+   "PASS  wrong_number                             expected=failed         actual=failed         ",
+   "PASS  number_from_other_row                    expected=verified       actual=verified       ",
+   "PASS  number_other_row_decimal                 expected=failed         actual=failed         ",
+   "PASS  wrong_block_id_real_quote                expected=needs_review   actual=needs_review   ",
+   "PASS  paraphrased_quote                        expected=needs_review   actual=needs_review   ",
+   "PASS  no_anchor                                expected=failed         actual=failed         ",
+   "PASS  unknown_table                            expected=failed         actual=failed         ",
+   "PASS  bad_bbox_image_anchor                    expected=failed         actual=failed         ",
+   "PASS  figure_reading                           expected=needs_review   actual=needs_review   ",
+   "PASS  coarse_section_anchor                    expected=needs_review   actual=needs_review   ",
+   "PASS  section_note_outside_section             expected=needs_review   actual=needs_review   ",
+   "PASS  uncovered_section_reported               expected=True           actual=True           ",
+   "PASS  section_order_follows_paper              expected=['1 Introduction', '2 Method', '2.1 Reading order', '3 Results'] actual=['1 Introduction', '2 Method', '2.1 Reading order', '3 Results'] ",
+   "PASS  knowledge_merged                         expected=1              actual=1              ",
+   "PASS  contract_auto_map_limitations            expected=True           actual=True           ",
+   "PASS  status_partial_when_failures             expected=partial        actual=partial        ",
+   "PASS  card_missing_none_when_filled_or_failed  expected=[]             actual=[]             ",
+   "PASS  output_notes.md                          expected=True           actual=True           ",
+   "PASS  output_paper_card.csv                    expected=True           actual=True           ",
+   "PASS  output_knowledge_points.jsonl            expected=True           actual=True           ",
+   "PASS  output_verification.json                 expected=True           actual=True           ",
+   "PASS  encrypted_status_failed                  expected=failed         actual=failed         paper.pdf: encrypted",
+   "PASS  scanned_pseudo_section                   expected=True           actual=True           s1 L1  [page 1, image-only page, read the page image] pp1-1"
+  ]
+ },
+ "seconds": 1.44
+}

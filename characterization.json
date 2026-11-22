@@ -1,0 +1,35 @@
+{
+ "deviations_from_paper": [
+  {
+   "target": "self-test expectations met",
+   "metric": "absolute_error",
+   "actual_value": 1.0,
+   "reference_value": 1.0,
+   "score": 1.0,
+   "tolerance": 0.1,
+   "evidence_artifact": "metrics",
+   "explanation": "tests/run_tests.py: synthetic two-column paper, 14 adversarial note perturbations (fabricated quote, wrong number, number from other table row, wrong block, paraphrase, missing anchor, off-page bbox, unknown table, figure reading, coarse anchor), coverage/order/merge/contract checks, encrypted and scanned inputs"
+  },
+  {
+   "target": "dev example (arXiv 1502.03167): note items verified against PDF",
+   "metric": "absolute_error",
+   "actual_value": 1.0,
+   "reference_value": 1.0,
+   "score": 1.0,
+   "tolerance": 0.1,
+   "evidence_artifact": "example_bn_verification",
+   "explanation": "37/37 verified, 0 failed; first build had caught 1 unsupported number in the draft. Notes written by Claude during development, not by the platform model; not an official case."
+  },
+  {
+   "target": "dev example: top-level section coverage",
+   "metric": "absolute_error",
+   "actual_value": 1.0,
+   "reference_value": 1.0,
+   "score": 1.0,
+   "tolerance": 0.1,
+   "evidence_artifact": "example_bn_verification",
+   "explanation": "every top-level section of the paper's own outline has at least one anchored note"
+  }
+ ],
+ "summary": "No A/B against the platform base agent was run by the author; the platform runs the fixed-case comparison."
+}

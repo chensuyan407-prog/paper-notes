@@ -1,0 +1,531 @@
+{
+ "_how_to": "Fill and save, then run `notes.py build`. Every item = {\"text\": your note, \"a\": [anchors]}; a field may hold one item or a list of items. Anchor = 'p3-b12: verbatim words copied from that block' (6-25 words), or 'Table 2', 'Table 2: cell words', 'Fig. 4', 'Eq. 3'. Numbers in a note must appear in its anchored block/table. Set a field to null only with an entry in 'unreported'. Delete '_prefilled' keys you overwrite. Sections: fill 'purpose', 'method', 'results', 'conclusion' (null if not applicable to that section, e.g. Related Work has no results) and 'transition' (how this section links to the previous/next one). 'contract' maps each output_contract field to a value or a reference: '@card', '@card.limitations', '@sections', '@knowledge', '@notes_md', '@evidence'.",
+ "card": {
+  "title": {
+   "text": "Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate Shift",
+   "_prefilled": true,
+   "a": [
+    "p1-b1: Batch Normalization: Accelerating Deep Network Training by",
+    "p1-b2: Reducing Internal Covariate Shift"
+   ]
+  },
+  "authors": {
+   "text": "Sergey Ioffe Google Inc., sioffe@google.com",
+   "_prefilled": true,
+   "a": [
+    "p1-b3: Sergey Ioffe Google Inc., sioffe@google.com"
+   ]
+  },
+  "venue_year": null,
+  "research_question": {
+   "text": "能否通过在网络结构中对各层输入做归一化来减少内部协变量偏移（ICS），从而加速深层网络训练？",
+   "a": [
+    "p2-b5: We propose a new mechanism, which we call Batch Normalization, that takes a step towards reducing internal covariate shift"
+   ]
+  },
+  "motivation_gap": {
+   "text": "各层输入分布随前层参数变化，需要更小学习率和谨慎初始化，饱和非线性难以训练",
+   "a": [
+    "p1-b5: This slows down the training by requiring lower learning rates and careful parameter initialization"
+   ]
+  },
+  "contributions": null,
+  "data": [
+   {
+    "text": "MNIST：28x28 二值图像输入，3 个各 100 单元的全连接隐层，训练 50000 步、每 mini-batch 60 个样本",
+    "a": [
+     "p5-b26: predicting the digit class on the MNIST dataset",
+     "p6-b3: We trained the network for 50000 steps, with 60 examples per mi"
+    ]
+   },
+   {
+    "text": "ImageNet（LSVRC2012）分类，1000 类；Figure 4 的对比基于 50000 张验证集图像",
+    "a": [
+     "p7-b3: all trained on the LSVRC2012 training data, and tested on the validation data",
+     "p6-b7: out of 1000 possibilities",
+     "Fig. 4: provided validation set comprising 50000 images"
+    ]
+   }
+  ],
+  "method": [
+   {
+    "text": "逐维归一化（均值 0、方差 1），并引入可学习的缩放 γ 和平移 β 以保持表示能力",
+    "a": [
+     "p3-b10: we will normalize each scalar feature independently, by making it have the mean of zero and the variance of 1",
+     "p3-b14: a pair of parameters γ(k), β(k), which scale and shift the normalized value"
+    ]
+   },
+   {
+    "text": "用 mini-batch 统计量估计均值方差（Algorithm 1），推理时改用总体统计量",
+    "a": [
+     "p3-b18: each mini-batch produces estimates of the mean and variance",
+     "p4-b48: using the population, rather than mini-batch, statistics"
+    ]
+   }
+  ],
+  "conditions": [
+   {
+    "text": "训练需 mini-batch 大小 m > 1",
+    "a": [
+     "p4-b45: Stochastic Gradient Descent with a mini-batch size m > 1"
+    ]
+   },
+   {
+    "text": "BN 加在非线性之前，归一化 x = Wu+b；卷积层按特征图跨位置联合归一化",
+    "a": [
+     "p5-b3: We add the BN transform immediately before the nonlinearity, by normalizing x = Wu+b",
+     "p5-b7: we jointly normalize all the activations in a minibatch, over all locations"
+    ]
+   },
+   {
+    "text": "ImageNet 实验：Inception 变体，mini-batch 32，Inception 初始学习率 0.0015，BN-x5 为 0.0075，BN-x30 为 0.045",
+    "a": [
+     "p6-b8: using the mini-batch size of 32",
+     "p7-b4: trained with the initial learning rate of 0.0015",
+     "p7-b6: to 0.0075",
+     "p7-b7: with the initial learning rate 0.045"
+    ]
+   }
+  ],
+  "main_findings": [
+   {
+    "text": "BN-x5 只需 Inception 1/14 的步数即达到 72.2% 精度",
+    "a": [
+     "p7-b12: BN-x5 needs 14 times fewer steps than Inception to reach the 72.2% accuracy"
+    ]
+   },
+   {
+    "text": "BN-x30 最高验证精度 74.8%，到达 72.2% 所需步数为 2.7·10^6（Inception 为 31.0·10^6）",
+    "a": [
+     "p7-b15: BN-x30 2.7 · 106 74.8%",
+     "p7-b15: Inception 31.0 · 106 72.2%"
+    ]
+   },
+   {
+    "text": "集成模型 top-5 验证误差 4.9%、测试误差 4.82%，优于此前最佳 4.94%",
+    "a": [
+     "p7-b19: Here we report a top-5 validation error of 4.9%, and test error of 4.82%",
+     "p7-b19: The latter reports the top-5 error of 4.94%"
+    ]
+   },
+   {
+    "text": "BN-x5-Sigmoid 达到 69.8%，而无 BN 的 sigmoid Inception 不超过 1/1000 精度",
+    "a": [
+     "p7-b17: BN-x5-Sigmoid achieves the accuracy of 69.8%"
+    ]
+   }
+  ],
+  "conclusion": {
+   "text": "BN 通过把归一化纳入网络结构加速训练，可用更高学习率、去掉 Dropout，并在 ImageNet 上超越当时最佳结果",
+   "a": [
+    "p8-b4: Merely adding Batch Normalization to a state-of-theart image classification model yields a substantial speedup in training"
+   ]
+  },
+  "limitations": [
+   {
+    "text": "作者承认尚未探索 BN 的全部可能；BN 使 Jacobian 奇异值接近 1 仅为猜想",
+    "a": [
+     "p8-b7: we have not explored the full range of possibilities that Batch Normalization potentially enables",
+     "p5-b21: We further conjecture that Batch Normalization may lead the layer Jacobians to have singular values close to 1"
+    ]
+   }
+  ],
+  "future_work": {
+   "text": "应用于 RNN、检验能否帮助领域自适应",
+   "a": [
+    "p8-b7: Our future work includes applications of our method to Recurrent Neural Networks"
+   ]
+  }
+ },
+ "sections": [
+  {
+   "section_id": "s1",
+   "heading": "Abstract",
+   "level": 1,
+   "pages": [
+    1,
+    1
+   ],
+   "purpose": {
+    "text": "提出 BN 以缓解内部协变量偏移、加速训练",
+    "a": [
+     "p1-b5: We refer to this"
+    ]
+   },
+   "method": null,
+   "results": null,
+   "conclusion": null,
+   "transition": null,
+   "key_points": []
+  },
+  {
+   "section_id": "s2",
+   "heading": "1 Introduction",
+   "level": 1,
+   "pages": [
+    1,
+    2
+   ],
+   "purpose": {
+    "text": "从 SGD 与 mini-batch 出发，引出层输入分布变化问题并定义 ICS",
+    "a": [
+     "p2-b5: We refer to the change in the distributions of internal nodes of a deep network, in the course of training, as Internal Covariate Shift"
+    ]
+   },
+   "method": null,
+   "results": null,
+   "conclusion": null,
+   "transition": {
+    "text": "预告第 4.2 节用 7% 的训练步数匹配 Inception",
+    "a": [
+     "p2-b6: show that we can match its performance using only 7% of the training steps"
+    ]
+   },
+   "key_points": []
+  },
+  {
+   "section_id": "sx1",
+   "heading": "2 Towards Reducing Internal Covariate Shift",
+   "level": 1,
+   "pages": [
+    2,
+    3
+   ],
+   "purpose": null,
+   "method": {
+    "text": "讨论白化：若优化忽略归一化依赖，偏置 b 会无限增长",
+    "a": [
+     "p2-b10: As the training continues, b will grow"
+    ]
+   },
+   "results": null,
+   "conclusion": {
+    "text": "完整白化代价高（需协方差矩阵及其逆平方根），促使下一节简化",
+    "a": [
+     "p3-b7: whitening the layer inputs is expensive"
+    ]
+   },
+   "transition": null,
+   "key_points": []
+  },
+  {
+   "section_id": "sx2",
+   "heading": "3 Normalization via Mini-Batch Statistics",
+   "level": 1,
+   "pages": [
+    3,
+    4
+   ],
+   "purpose": null,
+   "method": {
+    "text": "两项简化：逐维归一化；用 mini-batch 统计量",
+    "a": [
+     "p3-b10: we make two necessary simplifications"
+    ]
+   },
+   "results": null,
+   "conclusion": null,
+   "transition": null,
+   "key_points": []
+  },
+  {
+   "section_id": "sx3",
+   "heading": "3.1 Training and Inference with Batch-Normalized Networks",
+   "level": 2,
+   "pages": [
+    4,
+    4
+   ],
+   "purpose": null,
+   "method": {
+    "text": "训练用 mini-batch 统计量，推理用总体统计量，归一化变为确定性线性变换",
+    "a": [
+     "p4-b51: the normalization is simply a linear transform applied to each activation"
+    ]
+   },
+   "results": null,
+   "conclusion": null,
+   "transition": null,
+   "key_points": []
+  },
+  {
+   "section_id": "sx4",
+   "heading": "3.2 Batch-Normalized Convolutional Networks",
+   "level": 2,
+   "pages": [
+    4,
+    5
+   ],
+   "purpose": null,
+   "method": {
+    "text": "卷积层中同一特征图不同位置按相同方式归一化",
+    "a": [
+     "p5-b7: so that different elements of the same feature map, at different locations, are normalized in the same way"
+    ]
+   },
+   "results": null,
+   "conclusion": null,
+   "transition": null,
+   "key_points": []
+  },
+  {
+   "section_id": "sx5",
+   "heading": "3.3 Batch Normalization enables higher learning rates",
+   "level": 2,
+   "pages": [
+    5,
+    5
+   ],
+   "purpose": null,
+   "method": null,
+   "results": {
+    "text": "反向传播不受参数尺度影响，可用更高学习率",
+    "a": [
+     "p5-b11: backpropagation through a layer is unaffected by the scale of its parameters"
+    ]
+   },
+   "conclusion": null,
+   "transition": null,
+   "key_points": []
+  },
+  {
+   "section_id": "sx6",
+   "heading": "3.4 Batch Normalization regularizes the model",
+   "level": 2,
+   "pages": [
+    5,
+    5
+   ],
+   "purpose": null,
+   "method": null,
+   "results": null,
+   "conclusion": {
+    "text": "BN 有正则化效果，可减少或去掉 Dropout",
+    "a": [
+     "p5-b23: we found this effect to be advantageous to the generalization of the network"
+    ]
+   },
+   "transition": null,
+   "key_points": []
+  },
+  {
+   "section_id": "s5",
+   "heading": "4 Experiments",
+   "level": 1,
+   "pages": [
+    5,
+    5
+   ],
+   "purpose": null,
+   "method": null,
+   "results": null,
+   "conclusion": null,
+   "transition": null,
+   "key_points": []
+  },
+  {
+   "section_id": "s6",
+   "heading": "4.1 Activations over time",
+   "level": 2,
+   "pages": [
+    5,
+    6
+   ],
+   "purpose": null,
+   "method": null,
+   "results": {
+    "text": "MNIST 上 BN 网络测试精度更高，sigmoid 输入分布更稳定",
+    "a": [
+     "p6-b4: The batch-normalized network enjoys the higher test accuracy"
+    ]
+   },
+   "conclusion": null,
+   "transition": null,
+   "key_points": []
+  },
+  {
+   "section_id": "s7",
+   "heading": "4.2 ImageNet classification",
+   "level": 2,
+   "pages": [
+    6,
+    6
+   ],
+   "purpose": null,
+   "method": {
+    "text": "在 Inception 变体上加 BN，mini-batch 32",
+    "a": [
+     "p6-b8: using the mini-batch size of 32"
+    ]
+   },
+   "results": null,
+   "conclusion": null,
+   "transition": null,
+   "key_points": []
+  },
+  {
+   "section_id": "s8",
+   "heading": "4.2.1 Accelerating BN Networks",
+   "level": 3,
+   "pages": [
+    6,
+    7
+   ],
+   "purpose": null,
+   "method": {
+    "text": "配套修改：提高学习率、去 Dropout、L2 权重降为 1/5、学习率衰减快 6 倍、去 LRN、更彻底打乱、减少光度扰动",
+    "a": [
+     "p6-b14: the weight of this loss is reduced by a factor of 5",
+     "p6-b15: we lower the learning rate 6 times faster"
+    ]
+   },
+   "results": null,
+   "conclusion": null,
+   "transition": null,
+   "key_points": []
+  },
+  {
+   "section_id": "s9",
+   "heading": "4.2.2 Single-Network Classification",
+   "level": 3,
+   "pages": [
+    7,
+    7
+   ],
+   "purpose": null,
+   "method": null,
+   "results": {
+    "text": "BN-Baseline 不到一半步数即匹配 Inception",
+    "a": [
+     "p7-b12: we match the accuracy of Inception in less than half the number of training steps"
+    ]
+   },
+   "conclusion": null,
+   "transition": null,
+   "key_points": []
+  },
+  {
+   "section_id": "s10",
+   "heading": "4.2.3 Ensemble Classification",
+   "level": 3,
+   "pages": [
+    7,
+    7
+   ],
+   "purpose": null,
+   "method": null,
+   "results": {
+    "text": "6 个基于 BN-x30 的网络集成，测试 top-5 误差 4.82%",
+    "a": [
+     "p7-b20: For our ensemble, we used 6 networks",
+     "p7-b19: test error of 4.82%"
+    ]
+   },
+   "conclusion": null,
+   "transition": null,
+   "key_points": []
+  },
+  {
+   "section_id": "s11",
+   "heading": "5 Conclusion",
+   "level": 1,
+   "pages": [
+    7,
+    8
+   ],
+   "purpose": null,
+   "method": null,
+   "results": null,
+   "conclusion": {
+    "text": "总结：BN 在架构内归一化，可配合任意优化方法；并说明与 standardization layer 的区别",
+    "a": [
+     "p8-b3: incorporating this normalization in the network architecture itself"
+    ]
+   },
+   "transition": null,
+   "key_points": []
+  },
+  {
+   "section_id": "s13",
+   "heading": "Appendix",
+   "level": 1,
+   "pages": [
+    9,
+    11
+   ],
+   "purpose": null,
+   "method": null,
+   "results": null,
+   "conclusion": null,
+   "transition": null,
+   "key_points": [],
+   "skip_reason": "appendix: Inception variant details, not summarised"
+  }
+ ],
+ "knowledge": [
+  {
+   "term": "Internal Covariate Shift",
+   "aliases": [
+    "ICS",
+    "内部协变量偏移"
+   ],
+   "kind": "concept",
+   "definition": "训练中由于网络参数变化导致网络激活分布的变化",
+   "section_id": "sx1",
+   "a": [
+    "p2-b8: We define Internal Covariate Shift as the change in the distribution of network activations due to the change in network parameters during training"
+   ]
+  },
+  {
+   "term": "BN",
+   "aliases": [
+    "Batch Normalization",
+    "批归一化"
+   ],
+   "kind": "method",
+   "definition": "用 mini-batch 统计量对激活归一化并缩放平移",
+   "section_id": "sx2",
+   "a": [
+    "p3-b23: as the Batch Normalizing Transform"
+   ]
+  },
+  {
+   "term": "batch normalization",
+   "aliases": [],
+   "kind": "method",
+   "definition": "BN transform y = BNγ,β(x)",
+   "a": [
+    "p3-b44: In the notation y = BNγ,β(x)"
+   ]
+  },
+  {
+   "term": "γ, β",
+   "aliases": [
+    "scale and shift parameters"
+   ],
+   "kind": "variable",
+   "definition": "每个激活的可学习缩放与平移参数",
+   "section_id": "sx2",
+   "a": [
+    "p3-b14: a pair of parameters γ(k), β(k), which scale and shift the normalized value"
+   ]
+  }
+ ],
+ "unreported": [
+  {
+   "field": "card.contributions",
+   "reason": "no explicit contribution list"
+  },
+  {
+   "field": "card.venue_year",
+   "reason": "venue not printed in the text layer"
+  }
+ ],
+ "conflicts": [],
+ "uncertainty": [],
+ "contract": {
+  "paper_card": "@card",
+  "section_notes": "@sections"
+ },
+ "language": "notes in the task's language; quotes stay verbatim in the paper's language"
+}

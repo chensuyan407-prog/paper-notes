@@ -1,0 +1,4618 @@
+{
+ "case_id": "1502.03167",
+ "paper_card": {
+  "title": [
+   {
+    "text": "Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate Shift",
+    "anchors": [
+     {
+      "raw": "p1-b1: Batch Normalization: Accelerating Deep Network Training by",
+      "kind": "block",
+      "quote": "Batch Normalization: Accelerating Deep Network Training by",
+      "block_id": "p1-b1",
+      "page": 1,
+      "bbox": [
+       90.24,
+       59.75,
+       521.73,
+       82.72
+      ],
+      "role": "title",
+      "section_id": null,
+      "section": null,
+      "paragraph_id": null,
+      "ok": true,
+      "check": "quote_verbatim"
+     },
+     {
+      "raw": "p1-b2: Reducing Internal Covariate Shift",
+      "kind": "block",
+      "quote": "Reducing Internal Covariate Shift",
+      "block_id": "p1-b2",
+      "page": 1,
+      "bbox": [
+       189.96,
+       81.59,
+       422.15,
+       104.56
+      ],
+      "role": "title",
+      "section_id": null,
+      "section": null,
+      "paragraph_id": null,
+      "ok": true,
+      "check": "quote_verbatim"
+     }
+    ],
+    "check": {
+     "status": "verified"
+    }
+   }
+  ],
+  "authors": [
+   {
+    "text": "Sergey Ioffe Google Inc., sioffe@google.com",
+    "anchors": [
+     {
+      "raw": "p1-b3: Sergey Ioffe Google Inc., sioffe@google.com",
+      "kind": "block",
+      "quote": "Sergey Ioffe Google Inc., sioffe@google.com",
+      "block_id": "p1-b3",
+      "page": 1,
+      "bbox": [
+       127.68,
+       116.05,
+       286.44,
+       145.92
+      ],
+      "role": "author_affiliation",
+      "section_id": null,
+      "section": null,
+      "paragraph_id": null,
+      "ok": true,
+      "check": "quote_verbatim"
+     }
+    ],
+    "check": {
+     "status": "verified"
+    }
+   }
+  ],
+  "venue_year": [],
+  "research_question": [
+   {
+    "text": "能否通过在网络结构中对各层输入做归一化来减少内部协变量偏移（ICS），从而加速深层网络训练？",
+    "anchors": [
+     {
+      "raw": "p2-b5: We propose a new mechanism, which we call Batch Normalization, that takes a step towards reducing internal covariate shift",
+      "kind": "block",
+      "quote": "We propose a new mechanism, which we call Batch Normalization, that takes a step towards reducing internal covariate shift",
+      "block_id": "p2-b5",
+      "page": 2,
+      "bbox": [
+       72.0,
+       381.79,
+       301.36,
+       610.24
+      ],
+      "role": "body",
+      "section_id": "s2",
+      "section": "1 Introduction",
+      "paragraph_id": "para19",
+      "ok": true,
+      "check": "quote_verbatim"
+     }
+    ],
+    "check": {
+     "status": "verified"
+    }
+   }
+  ],
+  "motivation_gap": [
+   {
+    "text": "各层输入分布随前层参数变化，需要更小学习率和谨慎初始化，饱和非线性难以训练",
+    "anchors": [
+     {
+      "raw": "p1-b5: This slows down the training by requiring lower learning rates and careful parameter initialization",
+      "kind": "block",
+      "quote": "This slows down the training by requiring lower learning rates and careful parameter initialization",
+      "block_id": "p1-b5",
+      "page": 1,
+      "bbox": [
+       72.0,
+       193.39,
+       301.29,
+       457.72
+      ],
+      "role": "body",
+      "section_id": "s1",
+      "section": "Abstract",
+      "paragraph_id": "para1",
+      "ok": true,
+      "check": "quote_verbatim"
+     }
+    ],
+    "check": {
+     "status": "verified"
+    }
+   }
+  ],
+  "contributions": [],
+  "data": [
+   {
+    "text": "MNIST：28x28 二值图像输入，3 个各 100 单元的全连接隐层，训练 50000 步、每 mini-batch 60 个样本",
+    "anchors": [
+     {
+      "raw": "p5-b26: predicting the digit class on the MNIST dataset",
+      "kind": "block",
+      "quote": "predicting the digit class on the MNIST dataset",
+      "block_id": "p5-b26",
+      "page": 5,
+      "bbox": [
+       311.04,
+       661.63,
+       540.18,
+       722.8
+      ],
+      "role": "body",
+      "section_id": "s6",
+      "section": "4 Experiments > 4.1 Activations over time",
+      "paragraph_id": "para123",
+      "ok": true,
+      "check": "quote_verbatim"
+     },
+     {
+      "raw": "p6-b3: We trained the network for 50000 steps, with 60 examples per mi",
+      "kind": "block",
+      "quote": "We trained the network for 50000 steps, with 60 examples per mi",
+      "block_id": "p6-b3",
+      "page": 6,
+      "bbox": [
+       72.0,
+       224.71,
+       301.29,
+       369.52
+      ],
+      "role": "body",
+      "section_id": "s6",
+      "section": "4 Experiments > 4.1 Activations over time",
+      "paragraph_id": "para124",
+      "ok": true,
+      "check": "quote_verbatim"
+     }
+    ],
+    "check": {
+     "status": "verified"
+    }
+   },
+   {
+    "text": "ImageNet（LSVRC2012）分类，1000 类；Figure 4 的对比基于 50000 张验证集图像",
+    "anchors": [
+     {
+      "raw": "p7-b3: all trained on the LSVRC2012 training data, and tested on the validation data",
+      "kind": "block",
+      "quote": "all trained on the LSVRC2012 training data, and tested on the validation data",
+      "block_id": "p7-b3",
+      "page": 7,
+      "bbox": [
+       72.0,
+       250.75,
+       301.14,
+       287.92
+      ],
+      "role": "body",
+      "section_id": "s9",
+      "section": "4 Experiments > 4.2 ImageNet classification > 4.2.2 Single-Network Classification",
+      "paragraph_id": "para137",
+      "ok": true,
+      "check": "quote_verbatim"
+     },
+     {
+      "raw": "p6-b7: out of 1000 possibilities",
+      "kind": "block",
+      "quote": "out of 1000 possibilities",
+      "block_id": "p6-b7",
+      "page": 6,
+      "bbox": [
+       72.0,
+       577.99,
+       301.18,
+       722.8
+      ],
+      "role": "body",
+      "section_id": "s7",
+      "section": "4 Experiments > 4.2 ImageNet classification",
+      "paragraph_id": "para127",
+      "ok": true,
+      "check": "quote_verbatim"
+     },
+     {
+      "raw": "Fig. 4: provided validation set comprising 50000 images",
+      "kind": "figure",
+      "quote": "provided validation set comprising 50000 images",
+      "figure": "Figure 4",
+      "figure_id": "F4",
+      "page": 8,
+      "bbox": null,
+      "caption": "Figure 4: Batch-Normalized Inception comparison with previous state of the art on the provided validation set comprising 50000 images. *BN-Inception ensemble has reached 4.82% top-5 error on the 10000",
+      "caption_block": "p8-b2",
+      "section_id": "s11",
+      "section": "5 Conclusion",
+      "ok": true,
+      "check": "quote_in_caption"
+     }
+    ],
+    "check": {
+     "status": "verified"
+    }
+   }
+  ],
+  "method": [
+   {
+    "text": "逐维归一化（均值 0、方差 1），并引入可学习的缩放 γ 和平移 β 以保持表示能力",
+    "anchors": [
+     {
+      "raw": "p3-b10: we will normalize each scalar feature independently, by making it have the mean of zero and the variance of 1",
+      "kind": "block",
+      "quote": "we will normalize each scalar feature independently, by making it have the mean of zero and the variance of 1",
+      "block_id": "p3-b10",
+      "page": 3,
+      "bbox": [
+       72.0,
+       463.99,
+       301.16,
+       561.04
+      ],
+      "role": "body",
+      "section_id": "sx2",
+      "section": "3 Normalization via Mini-Batch Statistics",
+      "paragraph_id": "para32",
+      "ok": true,
+      "check": "quote_verbatim"
+     },
+     {
+      "raw": "p3-b14: a pair of parameters γ(k), β(k), which scale and shift the normalized value",
+      "kind": "block",
+      "quote": "a pair of parameters γ(k), β(k), which scale and shift the normalized value",
+      "block_id": "p3-b14",
+      "page": 3,
+      "bbox": [
+       311.04,
+       35.47,
+       540.28,
+       60.76
+      ],
+      "role": "body",
+      "section_id": "sx2",
+      "section": "3 Normalization via Mini-Batch Statistics",
+      "paragraph_id": "para34",
+      "ok": true,
+      "check": "quote_verbatim"
+     }
+    ],
+    "check": {
+     "status": "verified",
+     "small_numbers_unchecked": [
+      "0"
+     ]
+    }
+   },
+   {
+    "text": "用 mini-batch 统计量估计均值方差（Algorithm 1），推理时改用总体统计量",
+    "anchors": [
+     {
+      "raw": "p3-b18: each mini-batch produces estimates of the mean and variance",
+      "kind": "block",
+      "quote": "each mini-batch produces estimates of the mean and variance",
+      "block_id": "p3-b18",
+      "page": 3,
+      "bbox": [
+       311.04,
+       149.23,
+       540.2,
+       317.92
+      ],
+      "role": "body",
+      "section_id": "sx2",
+      "section": "3 Normalization via Mini-Batch Statistics",
+      "paragraph_id": "para37",
+      "ok": true,
+      "check": "quote_verbatim"
+     },
+     {
+      "raw": "p4-b48: using the population, rather than mini-batch, statistics",
+      "kind": "block",
+      "quote": "using the population, rather than mini-batch, statistics",
+      "block_id": "p4-b48",
+      "page": 4,
+      "bbox": [
+       311.04,
+       137.47,
+       540.08,
+       186.64
+      ],
+      "role": "body",
+      "section_id": "sx3",
+      "section": "3 Normalization via Mini-Batch Statistics > 3.1 Training and Inference with Batch-Normalized Networks",
+      "paragraph_id": "para73",
+      "ok": true,
+      "check": "quote_verbatim"
+     }
+    ],
+    "check": {
+     "status": "verified"
+    }
+   }
+  ],
+  "conditions": [
+   {
+    "text": "训练需 mini-batch 大小 m > 1",
+    "anchors": [
+     {
+      "raw": "p4-b45: Stochastic Gradient Descent with a mini-batch size m > 1",
+      "kind": "block",
+      "quote": "Stochastic Gradient Descent with a mini-batch size m > 1",
+      "block_id": "p4-b45",
+      "page": 4,
+      "bbox": [
+       72.0,
+       637.75,
+       301.26,
+       722.8
+      ],
+      "role": "body",
+      "section_id": "sx3",
+      "section": "3 Normalization via Mini-Batch Statistics > 3.1 Training and Inference with Batch-Normalized Networks",
+      "paragraph_id": "para72",
+      "ok": true,
+      "check": "quote_verbatim"
+     }
+    ],
+    "check": {
+     "status": "verified"
+    }
+   },
+   {
+    "text": "BN 加在非线性之前，归一化 x = Wu+b；卷积层按特征图跨位置联合归一化",
+    "anchors": [
+     {
+      "raw": "p5-b3: We add the BN transform immediately before the nonlinearity, by normalizing x = Wu+b",
+      "kind": "block",
+      "quote": "We add the BN transform immediately before the nonlinearity, by normalizing x = Wu+b",
+      "block_id": "p5-b3",
+      "page": 5,
+      "bbox": [
+       72.0,
+       90.91,
+       301.45,
+       247.6
+      ],
+      "role": "body",
+      "section_id": "sx4",
+      "section": "3 Normalization via Mini-Batch Statistics > 3.2 Batch-Normalized Convolutional Networks",
+      "paragraph_id": "para110",
+      "ok": true,
+      "check": "quote_verbatim"
+     },
+     {
+      "raw": "p5-b7: we jointly normalize all the activations in a minibatch, over all locations",
+      "kind": "block",
+      "quote": "we jointly normalize all the activations in a minibatch, over all locations",
+      "block_id": "p5-b7",
+      "page": 5,
+      "bbox": [
+       72.0,
+       361.51,
+       301.33,
+       530.2
+      ],
+      "role": "body",
+      "section_id": "sx4",
+      "section": "3 Normalization via Mini-Batch Statistics > 3.2 Batch-Normalized Convolutional Networks",
+      "paragraph_id": "para113",
+      "ok": true,
+      "check": "quote_verbatim"
+     }
+    ],
+    "check": {
+     "status": "verified"
+    }
+   },
+   {
+    "text": "ImageNet 实验：Inception 变体，mini-batch 32，Inception 初始学习率 0.0015，BN-x5 为 0.0075，BN-x30 为 0.045",
+    "anchors": [
+     {
+      "raw": "p6-b8: using the mini-batch size of 32",
+      "kind": "block",
+      "quote": "using the mini-batch size of 32",
+      "block_id": "p6-b8",
+      "page": 6,
+      "bbox": [
+       311.04,
+       35.47,
+       540.2,
+       156.4
+      ],
+      "role": "body",
+      "section_id": "s7",
+      "section": "4 Experiments > 4.2 ImageNet classification",
+      "paragraph_id": "para127",
+      "ok": true,
+      "check": "quote_verbatim"
+     },
+     {
+      "raw": "p7-b4: trained with the initial learning rate of 0.0015",
+      "kind": "block",
+      "quote": "trained with the initial learning rate of 0.0015",
+      "block_id": "p7-b4",
+      "page": 7,
+      "bbox": [
+       72.0,
+       287.11,
+       301.29,
+       312.28
+      ],
+      "role": "body",
+      "section_id": "s9",
+      "section": "4 Experiments > 4.2 ImageNet classification > 4.2.2 Single-Network Classification",
+      "paragraph_id": "para138",
+      "ok": true,
+      "check": "quote_verbatim"
+     },
+     {
+      "raw": "p7-b6: to 0.0075",
+      "kind": "block",
+      "quote": "to 0.0075",
+      "block_id": "p7-b6",
+      "page": 7,
+      "bbox": [
+       72.0,
+       335.71,
+       301.14,
+       396.88
+      ],
+      "role": "body",
+      "section_id": "s9",
+      "section": "4 Experiments > 4.2 ImageNet classification > 4.2.2 Single-Network Classification",
+      "paragraph_id": "para140",
+      "ok": true,
+      "check": "quote_verbatim"
+     },
+     {
+      "raw": "p7-b7: with the initial learning rate 0.045",
+      "kind": "block",
+      "quote": "with the initial learning rate 0.045",
+      "block_id": "p7-b7",
+      "page": 7,
+      "bbox": [
+       72.0,
+       395.95,
+       301.16,
+       445.48
+      ],
+      "role": "body",
+      "section_id": "s9",
+      "section": "4 Experiments > 4.2 ImageNet classification > 4.2.2 Single-Network Classification",
+      "paragraph_id": "para141",
+      "ok": true,
+      "check": "quote_verbatim"
+     }
+    ],
+    "check": {
+     "status": "verified"
+    }
+   }
+  ],
+  "main_findings": [
+   {
+    "text": "BN-x5 只需 Inception 1/14 的步数即达到 72.2% 精度",
+    "anchors": [
+     {
+      "raw": "p7-b12: BN-x5 needs 14 times fewer steps than Inception to reach the 72.2% accuracy",
+      "kind": "block",
+      "quote": "BN-x5 needs 14 times fewer steps than Inception to reach the 72.2% accuracy",
+      "block_id": "p7-b12",
+      "page": 7,
+      "bbox": [
+       72.0,
+       565.63,
+       301.16,
+       681.32
+      ],
+      "role": "body",
+      "section_id": "s9",
+      "section": "4 Experiments > 4.2 ImageNet classification > 4.2.2 Single-Network Classification",
+      "paragraph_id": "para145",
+      "ok": true,
+      "check": "quote_verbatim"
+     }
+    ],
+    "check": {
+     "status": "verified",
+     "small_numbers_unchecked": [
+      "1"
+     ]
+    }
+   },
+   {
+    "text": "BN-x30 最高验证精度 74.8%，到达 72.2% 所需步数为 2.7·10^6（Inception 为 31.0·10^6）",
+    "anchors": [
+     {
+      "raw": "p7-b15: BN-x30 2.7 · 106 74.8%",
+      "kind": "block",
+      "quote": "BN-x30 2.7 · 106 74.8%",
+      "block_id": "p7-b15",
+      "page": 7,
+      "bbox": [
+       328.21,
+       71.47,
+       533.46,
+       144.88
+      ],
+      "role": "body",
+      "section_id": "s9",
+      "section": "4 Experiments > 4.2 ImageNet classification > 4.2.2 Single-Network Classification",
+      "paragraph_id": "para147",
+      "ok": true,
+      "check": "quote_verbatim"
+     },
+     {
+      "raw": "p7-b15: Inception 31.0 · 106 72.2%",
+      "kind": "block",
+      "quote": "Inception 31.0 · 106 72.2%",
+      "block_id": "p7-b15",
+      "page": 7,
+      "bbox": [
+       328.21,
+       71.47,
+       533.46,
+       144.88
+      ],
+      "role": "body",
+      "section_id": "s9",
+      "section": "4 Experiments > 4.2 ImageNet classification > 4.2.2 Single-Network Classification",
+      "paragraph_id": "para147",
+      "ok": true,
+      "check": "quote_verbatim"
+     }
+    ],
+    "check": {
+     "status": "verified",
+     "small_numbers_unchecked": [
+      "6",
+      "6"
+     ]
+    }
+   },
+   {
+    "text": "集成模型 top-5 验证误差 4.9%、测试误差 4.82%，优于此前最佳 4.94%",
+    "anchors": [
+     {
+      "raw": "p7-b19: Here we report a top-5 validation error of 4.9%, and test error of 4.82%",
+      "kind": "block",
+      "quote": "Here we report a top-5 validation error of 4.9%, and test error of 4.82%",
+      "block_id": "p7-b19",
+      "page": 7,
+      "bbox": [
+       311.04,
+       327.19,
+       540.3,
+       448.0
+      ],
+      "role": "body",
+      "section_id": "s10",
+      "section": "4 Experiments > 4.2 ImageNet classification > 4.2.3 Ensemble Classification",
+      "paragraph_id": "para148",
+      "ok": true,
+      "check": "quote_verbatim"
+     },
+     {
+      "raw": "p7-b19: The latter reports the top-5 error of 4.94%",
+      "kind": "block",
+      "quote": "The latter reports the top-5 error of 4.94%",
+      "block_id": "p7-b19",
+      "page": 7,
+      "bbox": [
+       311.04,
+       327.19,
+       540.3,
+       448.0
+      ],
+      "role": "body",
+      "section_id": "s10",
+      "section": "4 Experiments > 4.2 ImageNet classification > 4.2.3 Ensemble Classification",
+      "paragraph_id": "para148",
+      "ok": true,
+      "check": "quote_verbatim"
+     }
+    ],
+    "check": {
+     "status": "verified"
+    }
+   },
+   {
+    "text": "BN-x5-Sigmoid 达到 69.8%，而无 BN 的 sigmoid Inception 不超过 1/1000 精度",
+    "anchors": [
+     {
+      "raw": "p7-b17: BN-x5-Sigmoid achieves the accuracy of 69.8%",
+      "kind": "block",
+      "quote": "BN-x5-Sigmoid achieves the accuracy of 69.8%",
+      "block_id": "p7-b17",
+      "page": 7,
+      "bbox": [
+       311.04,
+       231.31,
+       540.33,
+       292.36
+      ],
+      "role": "body",
+      "section_id": "s9",
+      "section": "4 Experiments > 4.2 ImageNet classification > 4.2.2 Single-Network Classification",
+      "paragraph_id": "para147",
+      "ok": true,
+      "check": "quote_verbatim"
+     }
+    ],
+    "check": {
+     "status": "verified"
+    }
+   }
+  ],
+  "conclusion": [
+   {
+    "text": "BN 通过把归一化纳入网络结构加速训练，可用更高学习率、去掉 Dropout，并在 ImageNet 上超越当时最佳结果",
+    "anchors": [
+     {
+      "raw": "p8-b4: Merely adding Batch Normalization to a state-of-theart image classification model yields a substantial speedup in training",
+      "kind": "block",
+      "quote": "Merely adding Batch Normalization to a state-of-theart image classification model yields a substantial speedup in training",
+      "block_id": "p8-b4",
+      "page": 8,
+      "bbox": [
+       72.0,
+       416.83,
+       301.35,
+       549.76
+      ],
+      "role": "body",
+      "section_id": "s11",
+      "section": "5 Conclusion",
+      "paragraph_id": "para153",
+      "ok": true,
+      "check": "quote_verbatim"
+     }
+    ],
+    "check": {
+     "status": "verified"
+    }
+   }
+  ],
+  "limitations": [
+   {
+    "text": "作者承认尚未探索 BN 的全部可能；BN 使 Jacobian 奇异值接近 1 仅为猜想",
+    "anchors": [
+     {
+      "raw": "p8-b7: we have not explored the full range of possibilities that Batch Normalization potentially enables",
+      "kind": "block",
+      "quote": "we have not explored the full range of possibilities that Batch Normalization potentially enables",
+      "block_id": "p8-b7",
+      "page": 8,
+      "bbox": [
+       311.04,
+       292.39,
+       540.3,
+       485.08
+      ],
+      "role": "body",
+      "section_id": "s11",
+      "section": "5 Conclusion",
+      "paragraph_id": "para155",
+      "ok": true,
+      "check": "quote_verbatim"
+     },
+     {
+      "raw": "p5-b21: We further conjecture that Batch Normalization may lead the layer Jacobians to have singular values close to 1",
+      "kind": "block",
+      "quote": "We further conjecture that Batch Normalization may lead the layer Jacobians to have singular values close to 1",
+      "block_id": "p5-b21",
+      "page": 5,
+      "bbox": [
+       311.04,
+       225.19,
+       540.49,
+       441.64
+      ],
+      "role": "body",
+      "section_id": "sx5",
+      "section": "3 Normalization via Mini-Batch Statistics > 3.3 Batch Normalization enables higher learning rates",
+      "paragraph_id": "para120",
+      "ok": true,
+      "check": "quote_verbatim"
+     }
+    ],
+    "check": {
+     "status": "verified"
+    }
+   }
+  ],
+  "future_work": [
+   {
+    "text": "应用于 RNN、检验能否帮助领域自适应",
+    "anchors": [
+     {
+      "raw": "p8-b7: Our future work includes applications of our method to Recurrent Neural Networks",
+      "kind": "block",
+      "quote": "Our future work includes applications of our method to Recurrent Neural Networks",
+      "block_id": "p8-b7",
+      "page": 8,
+      "bbox": [
+       311.04,
+       292.39,
+       540.3,
+       485.08
+      ],
+      "role": "body",
+      "section_id": "s11",
+      "section": "5 Conclusion",
+      "paragraph_id": "para155",
+      "ok": true,
+      "check": "quote_verbatim"
+     }
+    ],
+    "check": {
+     "status": "verified"
+    }
+   }
+  ]
+ },
+ "section_notes": [
+  {
+   "section_id": "s1",
+   "number": null,
+   "heading": "Abstract",
+   "level": 1,
+   "parent": null,
+   "pages": [
+    1,
+    1
+   ],
+   "block_span": [
+    "p1-b4",
+    "p1-b5"
+   ],
+   "appendix": false,
+   "purpose": [
+    {
+     "text": "提出 BN 以缓解内部协变量偏移、加速训练",
+     "anchors": [
+      {
+       "raw": "p1-b5: We refer to this",
+       "kind": "block",
+       "quote": "We refer to this",
+       "block_id": "p1-b5",
+       "page": 1,
+       "bbox": [
+        72.0,
+        193.39,
+        301.29,
+        457.72
+       ],
+       "role": "body",
+       "section_id": "s1",
+       "section": "Abstract",
+       "paragraph_id": "para1",
+       "ok": true,
+       "check": "quote_verbatim"
+      }
+     ],
+     "check": {
+      "status": "verified"
+     }
+    }
+   ],
+   "method": [],
+   "results": [],
+   "conclusion": [],
+   "transition": [],
+   "key_points": []
+  },
+  {
+   "section_id": "s2",
+   "number": "1",
+   "heading": "1 Introduction",
+   "level": 1,
+   "parent": null,
+   "pages": [
+    1,
+    2
+   ],
+   "block_span": [
+    "p1-b6",
+    "p2-b6"
+   ],
+   "appendix": false,
+   "purpose": [
+    {
+     "text": "从 SGD 与 mini-batch 出发，引出层输入分布变化问题并定义 ICS",
+     "anchors": [
+      {
+       "raw": "p2-b5: We refer to the change in the distributions of internal nodes of a deep network, in the course of training, as Internal Covariate Shift",
+       "kind": "block",
+       "quote": "We refer to the change in the distributions of internal nodes of a deep network, in the course of training, as Internal Covariate Shift",
+       "block_id": "p2-b5",
+       "page": 2,
+       "bbox": [
+        72.0,
+        381.79,
+        301.36,
+        610.24
+       ],
+       "role": "body",
+       "section_id": "s2",
+       "section": "1 Introduction",
+       "paragraph_id": "para19",
+       "ok": true,
+       "check": "quote_verbatim"
+      }
+     ],
+     "check": {
+      "status": "verified"
+     }
+    }
+   ],
+   "method": [],
+   "results": [],
+   "conclusion": [],
+   "transition": [
+    {
+     "text": "预告第 4.2 节用 7% 的训练步数匹配 Inception",
+     "anchors": [
+      {
+       "raw": "p2-b6: show that we can match its performance using only 7% of the training steps",
+       "kind": "block",
+       "quote": "show that we can match its performance using only 7% of the training steps",
+       "block_id": "p2-b6",
+       "page": 2,
+       "bbox": [
+        72.0,
+        625.87,
+        301.24,
+        722.8
+       ],
+       "role": "body",
+       "section_id": "s2",
+       "section": "1 Introduction",
+       "paragraph_id": "para20",
+       "ok": true,
+       "check": "quote_verbatim"
+      }
+     ],
+     "check": {
+      "status": "verified"
+     }
+    }
+   ],
+   "key_points": []
+  },
+  {
+   "section_id": "sx1",
+   "number": "2",
+   "heading": "2 Towards Reducing Internal Covariate Shift",
+   "level": 1,
+   "parent": null,
+   "pages": [
+    2,
+    3
+   ],
+   "block_span": [
+    "p2-b7",
+    "p3-b8"
+   ],
+   "appendix": false,
+   "purpose": [],
+   "method": [
+    {
+     "text": "讨论白化：若优化忽略归一化依赖，偏置 b 会无限增长",
+     "anchors": [
+      {
+       "raw": "p2-b10: As the training continues, b will grow",
+       "kind": "block",
+       "quote": "As the training continues, b will grow",
+       "block_id": "p2-b10",
+       "page": 2,
+       "bbox": [
+        311.04,
+        451.23,
+        540.25,
+        612.4
+       ],
+       "role": "body",
+       "section_id": "sx1",
+       "section": "2 Towards Reducing Internal Covariate Shift",
+       "paragraph_id": "para24",
+       "ok": true,
+       "check": "quote_verbatim"
+      }
+     ],
+     "check": {
+      "status": "verified"
+     }
+    }
+   ],
+   "results": [],
+   "conclusion": [
+    {
+     "text": "完整白化代价高（需协方差矩阵及其逆平方根），促使下一节简化",
+     "anchors": [
+      {
+       "raw": "p3-b7: whitening the layer inputs is expensive",
+       "kind": "block",
+       "quote": "whitening the layer inputs is expensive",
+       "block_id": "p3-b7",
+       "page": 3,
+       "bbox": [
+        72.0,
+        175.15,
+        301.28,
+        296.08
+       ],
+       "role": "body",
+       "section_id": "sx1",
+       "section": "2 Towards Reducing Internal Covariate Shift",
+       "paragraph_id": "para29",
+       "ok": true,
+       "check": "quote_verbatim"
+      }
+     ],
+     "check": {
+      "status": "verified"
+     }
+    }
+   ],
+   "transition": [],
+   "key_points": []
+  },
+  {
+   "section_id": "sx2",
+   "number": "3",
+   "heading": "3 Normalization via Mini-Batch Statistics",
+   "level": 1,
+   "parent": null,
+   "pages": [
+    3,
+    4
+   ],
+   "block_span": [
+    "p3-b9",
+    "p4-b43"
+   ],
+   "appendix": false,
+   "purpose": [],
+   "method": [
+    {
+     "text": "两项简化：逐维归一化；用 mini-batch 统计量",
+     "anchors": [
+      {
+       "raw": "p3-b10: we make two necessary simplifications",
+       "kind": "block",
+       "quote": "we make two necessary simplifications",
+       "block_id": "p3-b10",
+       "page": 3,
+       "bbox": [
+        72.0,
+        463.99,
+        301.16,
+        561.04
+       ],
+       "role": "body",
+       "section_id": "sx2",
+       "section": "3 Normalization via Mini-Batch Statistics",
+       "paragraph_id": "para32",
+       "ok": true,
+       "check": "quote_verbatim"
+      }
+     ],
+     "check": {
+      "status": "verified"
+     }
+    }
+   ],
+   "results": [],
+   "conclusion": [],
+   "transition": [],
+   "key_points": []
+  },
+  {
+   "section_id": "sx3",
+   "number": "3.1",
+   "heading": "3.1 Training and Inference with Batch-Normalized Networks",
+   "level": 2,
+   "parent": "sx2",
+   "pages": [
+    4,
+    4
+   ],
+   "block_span": [
+    "p4-b44",
+    "p4-b95"
+   ],
+   "appendix": false,
+   "purpose": [],
+   "method": [
+    {
+     "text": "训练用 mini-batch 统计量，推理用总体统计量，归一化变为确定性线性变换",
+     "anchors": [
+      {
+       "raw": "p4-b51: the normalization is simply a linear transform applied to each activation",
+       "kind": "block",
+       "quote": "the normalization is simply a linear transform applied to each activation",
+       "block_id": "p4-b51",
+       "page": 4,
+       "bbox": [
+        311.04,
+        197.35,
+        540.21,
+        294.28
+       ],
+       "role": "body",
+       "section_id": "sx3",
+       "section": "3 Normalization via Mini-Batch Statistics > 3.1 Training and Inference with Batch-Normalized Networks",
+       "paragraph_id": "para75",
+       "ok": true,
+       "check": "quote_verbatim"
+      }
+     ],
+     "check": {
+      "status": "verified"
+     }
+    }
+   ],
+   "results": [],
+   "conclusion": [],
+   "transition": [],
+   "key_points": []
+  },
+  {
+   "section_id": "sx4",
+   "number": "3.2",
+   "heading": "3.2 Batch-Normalized Convolutional Networks",
+   "level": 2,
+   "parent": "sx2",
+   "pages": [
+    4,
+    5
+   ],
+   "block_span": [
+    "p4-b96",
+    "p5-b7"
+   ],
+   "appendix": false,
+   "purpose": [],
+   "method": [
+    {
+     "text": "卷积层中同一特征图不同位置按相同方式归一化",
+     "anchors": [
+      {
+       "raw": "p5-b7: so that different elements of the same feature map, at different locations, are normalized in the same way",
+       "kind": "block",
+       "quote": "so that different elements of the same feature map, at different locations, are normalized in the same way",
+       "block_id": "p5-b7",
+       "page": 5,
+       "bbox": [
+        72.0,
+        361.51,
+        301.33,
+        530.2
+       ],
+       "role": "body",
+       "section_id": "sx4",
+       "section": "3 Normalization via Mini-Batch Statistics > 3.2 Batch-Normalized Convolutional Networks",
+       "paragraph_id": "para113",
+       "ok": true,
+       "check": "quote_verbatim"
+      }
+     ],
+     "check": {
+      "status": "verified"
+     }
+    }
+   ],
+   "results": [],
+   "conclusion": [],
+   "transition": [],
+   "key_points": []
+  },
+  {
+   "section_id": "sx5",
+   "number": "3.3",
+   "heading": "3.3 Batch Normalization enables higher learning rates",
+   "level": 2,
+   "parent": "sx2",
+   "pages": [
+    5,
+    5
+   ],
+   "block_span": [
+    "p5-b8",
+    "p5-b21"
+   ],
+   "appendix": false,
+   "purpose": [],
+   "method": [],
+   "results": [
+    {
+     "text": "反向传播不受参数尺度影响，可用更高学习率",
+     "anchors": [
+      {
+       "raw": "p5-b11: backpropagation through a layer is unaffected by the scale of its parameters",
+       "kind": "block",
+       "quote": "backpropagation through a layer is unaffected by the scale of its parameters",
+       "block_id": "p5-b11",
+       "page": 5,
+       "bbox": [
+        311.04,
+        35.47,
+        540.2,
+        84.64
+       ],
+       "role": "body",
+       "section_id": "sx5",
+       "section": "3 Normalization via Mini-Batch Statistics > 3.3 Batch Normalization enables higher learning rates",
+       "paragraph_id": "para116",
+       "ok": true,
+       "check": "quote_verbatim"
+      }
+     ],
+     "check": {
+      "status": "verified"
+     }
+    }
+   ],
+   "conclusion": [],
+   "transition": [],
+   "key_points": []
+  },
+  {
+   "section_id": "sx6",
+   "number": "3.4",
+   "heading": "3.4 Batch Normalization regularizes the model",
+   "level": 2,
+   "parent": "sx2",
+   "pages": [
+    5,
+    5
+   ],
+   "block_span": [
+    "p5-b22",
+    "p5-b23"
+   ],
+   "appendix": false,
+   "purpose": [],
+   "method": [],
+   "results": [],
+   "conclusion": [
+    {
+     "text": "BN 有正则化效果，可减少或去掉 Dropout",
+     "anchors": [
+      {
+       "raw": "p5-b23: we found this effect to be advantageous to the generalization of the network",
+       "kind": "block",
+       "quote": "we found this effect to be advantageous to the generalization of the network",
+       "block_id": "p5-b23",
+       "page": 5,
+       "bbox": [
+        311.04,
+        489.55,
+        540.4,
+        598.48
+       ],
+       "role": "body",
+       "section_id": "sx6",
+       "section": "3 Normalization via Mini-Batch Statistics > 3.4 Batch Normalization regularizes the model",
+       "paragraph_id": "para122",
+       "ok": true,
+       "check": "quote_verbatim"
+      }
+     ],
+     "check": {
+      "status": "verified"
+     }
+    }
+   ],
+   "transition": [],
+   "key_points": []
+  },
+  {
+   "section_id": "s5",
+   "number": "4",
+   "heading": "4 Experiments",
+   "level": 1,
+   "parent": null,
+   "pages": [
+    5,
+    5
+   ],
+   "block_span": [
+    "p5-b24",
+    "p5-b24"
+   ],
+   "appendix": false,
+   "purpose": [],
+   "method": [],
+   "results": [],
+   "conclusion": [],
+   "transition": [],
+   "key_points": []
+  },
+  {
+   "section_id": "s6",
+   "number": "4.1",
+   "heading": "4.1 Activations over time",
+   "level": 2,
+   "parent": "s5",
+   "pages": [
+    5,
+    6
+   ],
+   "block_span": [
+    "p5-b25",
+    "p6-b5"
+   ],
+   "appendix": false,
+   "purpose": [],
+   "method": [],
+   "results": [
+    {
+     "text": "MNIST 上 BN 网络测试精度更高，sigmoid 输入分布更稳定",
+     "anchors": [
+      {
+       "raw": "p6-b4: The batch-normalized network enjoys the higher test accuracy",
+       "kind": "block",
+       "quote": "The batch-normalized network enjoys the higher test accuracy",
+       "block_id": "p6-b4",
+       "page": 6,
+       "bbox": [
+        72.0,
+        369.07,
+        301.36,
+        442.12
+       ],
+       "role": "body",
+       "section_id": "s6",
+       "section": "4 Experiments > 4.1 Activations over time",
+       "paragraph_id": "para125",
+       "ok": true,
+       "check": "quote_verbatim"
+      }
+     ],
+     "check": {
+      "status": "verified"
+     }
+    }
+   ],
+   "conclusion": [],
+   "transition": [],
+   "key_points": []
+  },
+  {
+   "section_id": "s7",
+   "number": "4.2",
+   "heading": "4.2 ImageNet classification",
+   "level": 2,
+   "parent": "s5",
+   "pages": [
+    6,
+    6
+   ],
+   "block_span": [
+    "p6-b6",
+    "p6-b9"
+   ],
+   "appendix": false,
+   "purpose": [],
+   "method": [
+    {
+     "text": "在 Inception 变体上加 BN，mini-batch 32",
+     "anchors": [
+      {
+       "raw": "p6-b8: using the mini-batch size of 32",
+       "kind": "block",
+       "quote": "using the mini-batch size of 32",
+       "block_id": "p6-b8",
+       "page": 6,
+       "bbox": [
+        311.04,
+        35.47,
+        540.2,
+        156.4
+       ],
+       "role": "body",
+       "section_id": "s7",
+       "section": "4 Experiments > 4.2 ImageNet classification",
+       "paragraph_id": "para127",
+       "ok": true,
+       "check": "quote_verbatim"
+      }
+     ],
+     "check": {
+      "status": "verified"
+     }
+    }
+   ],
+   "results": [],
+   "conclusion": [],
+   "transition": [],
+   "key_points": []
+  },
+  {
+   "section_id": "s8",
+   "number": "4.2.1",
+   "heading": "4.2.1 Accelerating BN Networks",
+   "level": 3,
+   "parent": "s7",
+   "pages": [
+    6,
+    7
+   ],
+   "block_span": [
+    "p6-b10",
+    "p7-b1"
+   ],
+   "appendix": false,
+   "purpose": [],
+   "method": [
+    {
+     "text": "配套修改：提高学习率、去 Dropout、L2 权重降为 1/5、学习率衰减快 6 倍、去 LRN、更彻底打乱、减少光度扰动",
+     "anchors": [
+      {
+       "raw": "p6-b14: the weight of this loss is reduced by a factor of 5",
+       "kind": "block",
+       "quote": "the weight of this loss is reduced by a factor of 5",
+       "block_id": "p6-b14",
+       "page": 6,
+       "bbox": [
+        311.04,
+        402.55,
+        540.2,
+        463.72
+       ],
+       "role": "body",
+       "section_id": "s8",
+       "section": "4 Experiments > 4.2 ImageNet classification > 4.2.1 Accelerating BN Networks",
+       "paragraph_id": "para132",
+       "ok": true,
+       "check": "quote_verbatim"
+      },
+      {
+       "raw": "p6-b15: we lower the learning rate 6 times faster",
+       "kind": "block",
+       "quote": "we lower the learning rate 6 times faster",
+       "block_id": "p6-b15",
+       "page": 6,
+       "bbox": [
+        311.04,
+        464.35,
+        540.2,
+        513.52
+       ],
+       "role": "body",
+       "section_id": "s8",
+       "section": "4 Experiments > 4.2 ImageNet classification > 4.2.1 Accelerating BN Networks",
+       "paragraph_id": "para133",
+       "ok": true,
+       "check": "quote_verbatim"
+      }
+     ],
+     "check": {
+      "status": "verified",
+      "small_numbers_unchecked": [
+       "1"
+      ]
+     }
+    }
+   ],
+   "results": [],
+   "conclusion": [],
+   "transition": [],
+   "key_points": []
+  },
+  {
+   "section_id": "s9",
+   "number": "4.2.2",
+   "heading": "4.2.2 Single-Network Classification",
+   "level": 3,
+   "parent": "s7",
+   "pages": [
+    7,
+    7
+   ],
+   "block_span": [
+    "p7-b2",
+    "p7-b17"
+   ],
+   "appendix": false,
+   "purpose": [],
+   "method": [],
+   "results": [
+    {
+     "text": "BN-Baseline 不到一半步数即匹配 Inception",
+     "anchors": [
+      {
+       "raw": "p7-b12: we match the accuracy of Inception in less than half the number of training steps",
+       "kind": "block",
+       "quote": "we match the accuracy of Inception in less than half the number of training steps",
+       "block_id": "p7-b12",
+       "page": 7,
+       "bbox": [
+        72.0,
+        565.63,
+        301.16,
+        681.32
+       ],
+       "role": "body",
+       "section_id": "s9",
+       "section": "4 Experiments > 4.2 ImageNet classification > 4.2.2 Single-Network Classification",
+       "paragraph_id": "para145",
+       "ok": true,
+       "check": "quote_verbatim"
+      }
+     ],
+     "check": {
+      "status": "verified"
+     }
+    }
+   ],
+   "conclusion": [],
+   "transition": [],
+   "key_points": []
+  },
+  {
+   "section_id": "s10",
+   "number": "4.2.3",
+   "heading": "4.2.3 Ensemble Classification",
+   "level": 3,
+   "parent": "s7",
+   "pages": [
+    7,
+    7
+   ],
+   "block_span": [
+    "p7-b18",
+    "p7-b21"
+   ],
+   "appendix": false,
+   "purpose": [],
+   "method": [],
+   "results": [
+    {
+     "text": "6 个基于 BN-x30 的网络集成，测试 top-5 误差 4.82%",
+     "anchors": [
+      {
+       "raw": "p7-b20: For our ensemble, we used 6 networks",
+       "kind": "block",
+       "quote": "For our ensemble, we used 6 networks",
+       "block_id": "p7-b20",
+       "page": 7,
+       "bbox": [
+        311.04,
+        447.07,
+        540.57,
+        591.88
+       ],
+       "role": "body",
+       "section_id": "s10",
+       "section": "4 Experiments > 4.2 ImageNet classification > 4.2.3 Ensemble Classification",
+       "paragraph_id": "para149",
+       "ok": true,
+       "check": "quote_verbatim"
+      },
+      {
+       "raw": "p7-b19: test error of 4.82%",
+       "kind": "block",
+       "quote": "test error of 4.82%",
+       "block_id": "p7-b19",
+       "page": 7,
+       "bbox": [
+        311.04,
+        327.19,
+        540.3,
+        448.0
+       ],
+       "role": "body",
+       "section_id": "s10",
+       "section": "4 Experiments > 4.2 ImageNet classification > 4.2.3 Ensemble Classification",
+       "paragraph_id": "para148",
+       "ok": true,
+       "check": "quote_verbatim"
+      }
+     ],
+     "check": {
+      "status": "verified"
+     }
+    }
+   ],
+   "conclusion": [],
+   "transition": [],
+   "key_points": []
+  },
+  {
+   "section_id": "s11",
+   "number": "5",
+   "heading": "5 Conclusion",
+   "level": 1,
+   "parent": null,
+   "pages": [
+    7,
+    8
+   ],
+   "block_span": [
+    "p7-b22",
+    "p8-b7"
+   ],
+   "appendix": false,
+   "purpose": [],
+   "method": [],
+   "results": [],
+   "conclusion": [
+    {
+     "text": "总结：BN 在架构内归一化，可配合任意优化方法；并说明与 standardization layer 的区别",
+     "anchors": [
+      {
+       "raw": "p8-b3: incorporating this normalization in the network architecture itself",
+       "kind": "block",
+       "quote": "incorporating this normalization in the network architecture itself",
+       "block_id": "p8-b3",
+       "page": 8,
+       "bbox": [
+        72.0,
+        196.03,
+        301.28,
+        412.48
+       ],
+       "role": "body",
+       "section_id": "s11",
+       "section": "5 Conclusion",
+       "paragraph_id": "para152",
+       "ok": true,
+       "check": "quote_verbatim"
+      }
+     ],
+     "check": {
+      "status": "verified"
+     }
+    }
+   ],
+   "transition": [],
+   "key_points": []
+  },
+  {
+   "section_id": "s13",
+   "number": null,
+   "heading": "Appendix",
+   "level": 1,
+   "parent": null,
+   "pages": [
+    9,
+    11
+   ],
+   "block_span": [
+    "p9-b41",
+    "p11-b9"
+   ],
+   "appendix": true,
+   "purpose": [],
+   "method": [],
+   "results": [],
+   "conclusion": [],
+   "transition": [],
+   "key_points": [],
+   "skip_reason": "appendix: Inception variant details, not summarised"
+  }
+ ],
+ "status": "success",
+ "run_status": {
+  "stage": "build",
+  "reason": null,
+  "n_needs_review": 0,
+  "seconds": 0.07,
+  "tool": "paper-notes 1.0.0",
+  "human_takeover": "see verification.failed_items / review_items (where = field path; anchors carry page+bbox)"
+ },
+ "notes": {
+  "paper_card": {
+   "title": [
+    {
+     "text": "Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate Shift",
+     "anchors": [
+      {
+       "raw": "p1-b1: Batch Normalization: Accelerating Deep Network Training by",
+       "kind": "block",
+       "quote": "Batch Normalization: Accelerating Deep Network Training by",
+       "block_id": "p1-b1",
+       "page": 1,
+       "bbox": [
+        90.24,
+        59.75,
+        521.73,
+        82.72
+       ],
+       "role": "title",
+       "section_id": null,
+       "section": null,
+       "paragraph_id": null,
+       "ok": true,
+       "check": "quote_verbatim"
+      },
+      {
+       "raw": "p1-b2: Reducing Internal Covariate Shift",
+       "kind": "block",
+       "quote": "Reducing Internal Covariate Shift",
+       "block_id": "p1-b2",
+       "page": 1,
+       "bbox": [
+        189.96,
+        81.59,
+        422.15,
+        104.56
+       ],
+       "role": "title",
+       "section_id": null,
+       "section": null,
+       "paragraph_id": null,
+       "ok": true,
+       "check": "quote_verbatim"
+      }
+     ],
+     "check": {
+      "status": "verified"
+     }
+    }
+   ],
+   "authors": [
+    {
+     "text": "Sergey Ioffe Google Inc., sioffe@google.com",
+     "anchors": [
+      {
+       "raw": "p1-b3: Sergey Ioffe Google Inc., sioffe@google.com",
+       "kind": "block",
+       "quote": "Sergey Ioffe Google Inc., sioffe@google.com",
+       "block_id": "p1-b3",
+       "page": 1,
+       "bbox": [
+        127.68,
+        116.05,
+        286.44,
+        145.92
+       ],
+       "role": "author_affiliation",
+       "section_id": null,
+       "section": null,
+       "paragraph_id": null,
+       "ok": true,
+       "check": "quote_verbatim"
+      }
+     ],
+     "check": {
+      "status": "verified"
+     }
+    }
+   ],
+   "venue_year": [],
+   "research_question": [
+    {
+     "text": "能否通过在网络结构中对各层输入做归一化来减少内部协变量偏移（ICS），从而加速深层网络训练？",
+     "anchors": [
+      {
+       "raw": "p2-b5: We propose a new mechanism, which we call Batch Normalization, that takes a step towards reducing internal covariate shift",
+       "kind": "block",
+       "quote": "We propose a new mechanism, which we call Batch Normalization, that takes a step towards reducing internal covariate shift",
+       "block_id": "p2-b5",
+       "page": 2,
+       "bbox": [
+        72.0,
+        381.79,
+        301.36,
+        610.24
+       ],
+       "role": "body",
+       "section_id": "s2",
+       "section": "1 Introduction",
+       "paragraph_id": "para19",
+       "ok": true,
+       "check": "quote_verbatim"
+      }
+     ],
+     "check": {
+      "status": "verified"
+     }
+    }
+   ],
+   "motivation_gap": [
+    {
+     "text": "各层输入分布随前层参数变化，需要更小学习率和谨慎初始化，饱和非线性难以训练",
+     "anchors": [
+      {
+       "raw": "p1-b5: This slows down the training by requiring lower learning rates and careful parameter initialization",
+       "kind": "block",
+       "quote": "This slows down the training by requiring lower learning rates and careful parameter initialization",
+       "block_id": "p1-b5",
+       "page": 1,
+       "bbox": [
+        72.0,
+        193.39,
+        301.29,
+        457.72
+       ],
+       "role": "body",
+       "section_id": "s1",
+       "section": "Abstract",
+       "paragraph_id": "para1",
+       "ok": true,
+       "check": "quote_verbatim"
+      }
+     ],
+     "check": {
+      "status": "verified"
+     }
+    }
+   ],
+   "contributions": [],
+   "data": [
+    {
+     "text": "MNIST：28x28 二值图像输入，3 个各 100 单元的全连接隐层，训练 50000 步、每 mini-batch 60 个样本",
+     "anchors": [
+      {
+       "raw": "p5-b26: predicting the digit class on the MNIST dataset",
+       "kind": "block",
+       "quote": "predicting the digit class on the MNIST dataset",
+       "block_id": "p5-b26",
+       "page": 5,
+       "bbox": [
+        311.04,
+        661.63,
+        540.18,
+        722.8
+       ],
+       "role": "body",
+       "section_id": "s6",
+       "section": "4 Experiments > 4.1 Activations over time",
+       "paragraph_id": "para123",
+       "ok": true,
+       "check": "quote_verbatim"
+      },
+      {
+       "raw": "p6-b3: We trained the network for 50000 steps, with 60 examples per mi",
+       "kind": "block",
+       "quote": "We trained the network for 50000 steps, with 60 examples per mi",
+       "block_id": "p6-b3",
+       "page": 6,
+       "bbox": [
+        72.0,
+        224.71,
+        301.29,
+        369.52
+       ],
+       "role": "body",
+       "section_id": "s6",
+       "section": "4 Experiments > 4.1 Activations over time",
+       "paragraph_id": "para124",
+       "ok": true,
+       "check": "quote_verbatim"
+      }
+     ],
+     "check": {
+      "status": "verified"
+     }
+    },
+    {
+     "text": "ImageNet（LSVRC2012）分类，1000 类；Figure 4 的对比基于 50000 张验证集图像",
+     "anchors": [
+      {
+       "raw": "p7-b3: all trained on the LSVRC2012 training data, and tested on the validation data",
+       "kind": "block",
+       "quote": "all trained on the LSVRC2012 training data, and tested on the validation data",
+       "block_id": "p7-b3",
+       "page": 7,
+       "bbox": [
+        72.0,
+        250.75,
+        301.14,
+        287.92
+       ],
+       "role": "body",
+       "section_id": "s9",
+       "section": "4 Experiments > 4.2 ImageNet classification > 4.2.2 Single-Network Classification",
+       "paragraph_id": "para137",
+       "ok": true,
+       "check": "quote_verbatim"
+      },
+      {
+       "raw": "p6-b7: out of 1000 possibilities",
+       "kind": "block",
+       "quote": "out of 1000 possibilities",
+       "block_id": "p6-b7",
+       "page": 6,
+       "bbox": [
+        72.0,
+        577.99,
+        301.18,
+        722.8
+       ],
+       "role": "body",
+       "section_id": "s7",
+       "section": "4 Experiments > 4.2 ImageNet classification",
+       "paragraph_id": "para127",
+       "ok": true,
+       "check": "quote_verbatim"
+      },
+      {
+       "raw": "Fig. 4: provided validation set comprising 50000 images",
+       "kind": "figure",
+       "quote": "provided validation set comprising 50000 images",
+       "figure": "Figure 4",
+       "figure_id": "F4",
+       "page": 8,
+       "bbox": null,
+       "caption": "Figure 4: Batch-Normalized Inception comparison with previous state of the art on the provided validation set comprising 50000 images. *BN-Inception ensemble has reached 4.82% top-5 error on the 10000",
+       "caption_block": "p8-b2",
+       "section_id": "s11",
+       "section": "5 Conclusion",
+       "ok": true,
+       "check": "quote_in_caption"
+      }
+     ],
+     "check": {
+      "status": "verified"
+     }
+    }
+   ],
+   "method": [
+    {
+     "text": "逐维归一化（均值 0、方差 1），并引入可学习的缩放 γ 和平移 β 以保持表示能力",
+     "anchors": [
+      {
+       "raw": "p3-b10: we will normalize each scalar feature independently, by making it have the mean of zero and the variance of 1",
+       "kind": "block",
+       "quote": "we will normalize each scalar feature independently, by making it have the mean of zero and the variance of 1",
+       "block_id": "p3-b10",
+       "page": 3,
+       "bbox": [
+        72.0,
+        463.99,
+        301.16,
+        561.04
+       ],
+       "role": "body",
+       "section_id": "sx2",
+       "section": "3 Normalization via Mini-Batch Statistics",
+       "paragraph_id": "para32",
+       "ok": true,
+       "check": "quote_verbatim"
+      },
+      {
+       "raw": "p3-b14: a pair of parameters γ(k), β(k), which scale and shift the normalized value",
+       "kind": "block",
+       "quote": "a pair of parameters γ(k), β(k), which scale and shift the normalized value",
+       "block_id": "p3-b14",
+       "page": 3,
+       "bbox": [
+        311.04,
+        35.47,
+        540.28,
+        60.76
+       ],
+       "role": "body",
+       "section_id": "sx2",
+       "section": "3 Normalization via Mini-Batch Statistics",
+       "paragraph_id": "para34",
+       "ok": true,
+       "check": "quote_verbatim"
+      }
+     ],
+     "check": {
+      "status": "verified",
+      "small_numbers_unchecked": [
+       "0"
+      ]
+     }
+    },
+    {
+     "text": "用 mini-batch 统计量估计均值方差（Algorithm 1），推理时改用总体统计量",
+     "anchors": [
+      {
+       "raw": "p3-b18: each mini-batch produces estimates of the mean and variance",
+       "kind": "block",
+       "quote": "each mini-batch produces estimates of the mean and variance",
+       "block_id": "p3-b18",
+       "page": 3,
+       "bbox": [
+        311.04,
+        149.23,
+        540.2,
+        317.92
+       ],
+       "role": "body",
+       "section_id": "sx2",
+       "section": "3 Normalization via Mini-Batch Statistics",
+       "paragraph_id": "para37",
+       "ok": true,
+       "check": "quote_verbatim"
+      },
+      {
+       "raw": "p4-b48: using the population, rather than mini-batch, statistics",
+       "kind": "block",
+       "quote": "using the population, rather than mini-batch, statistics",
+       "block_id": "p4-b48",
+       "page": 4,
+       "bbox": [
+        311.04,
+        137.47,
+        540.08,
+        186.64
+       ],
+       "role": "body",
+       "section_id": "sx3",
+       "section": "3 Normalization via Mini-Batch Statistics > 3.1 Training and Inference with Batch-Normalized Networks",
+       "paragraph_id": "para73",
+       "ok": true,
+       "check": "quote_verbatim"
+      }
+     ],
+     "check": {
+      "status": "verified"
+     }
+    }
+   ],
+   "conditions": [
+    {
+     "text": "训练需 mini-batch 大小 m > 1",
+     "anchors": [
+      {
+       "raw": "p4-b45: Stochastic Gradient Descent with a mini-batch size m > 1",
+       "kind": "block",
+       "quote": "Stochastic Gradient Descent with a mini-batch size m > 1",
+       "block_id": "p4-b45",
+       "page": 4,
+       "bbox": [
+        72.0,
+        637.75,
+        301.26,
+        722.8
+       ],
+       "role": "body",
+       "section_id": "sx3",
+       "section": "3 Normalization via Mini-Batch Statistics > 3.1 Training and Inference with Batch-Normalized Networks",
+       "paragraph_id": "para72",
+       "ok": true,
+       "check": "quote_verbatim"
+      }
+     ],
+     "check": {
+      "status": "verified"
+     }
+    },
+    {
+     "text": "BN 加在非线性之前，归一化 x = Wu+b；卷积层按特征图跨位置联合归一化",
+     "anchors": [
+      {
+       "raw": "p5-b3: We add the BN transform immediately before the nonlinearity, by normalizing x = Wu+b",
+       "kind": "block",
+       "quote": "We add the BN transform immediately before the nonlinearity, by normalizing x = Wu+b",
+       "block_id": "p5-b3",
+       "page": 5,
+       "bbox": [
+        72.0,
+        90.91,
+        301.45,
+        247.6
+       ],
+       "role": "body",
+       "section_id": "sx4",
+       "section": "3 Normalization via Mini-Batch Statistics > 3.2 Batch-Normalized Convolutional Networks",
+       "paragraph_id": "para110",
+       "ok": true,
+       "check": "quote_verbatim"
+      },
+      {
+       "raw": "p5-b7: we jointly normalize all the activations in a minibatch, over all locations",
+       "kind": "block",
+       "quote": "we jointly normalize all the activations in a minibatch, over all locations",
+       "block_id": "p5-b7",
+       "page": 5,
+       "bbox": [
+        72.0,
+        361.51,
+        301.33,
+        530.2
+       ],
+       "role": "body",
+       "section_id": "sx4",
+       "section": "3 Normalization via Mini-Batch Statistics > 3.2 Batch-Normalized Convolutional Networks",
+       "paragraph_id": "para113",
+       "ok": true,
+       "check": "quote_verbatim"
+      }
+     ],
+     "check": {
+      "status": "verified"
+     }
+    },
+    {
+     "text": "ImageNet 实验：Inception 变体，mini-batch 32，Inception 初始学习率 0.0015，BN-x5 为 0.0075，BN-x30 为 0.045",
+     "anchors": [
+      {
+       "raw": "p6-b8: using the mini-batch size of 32",
+       "kind": "block",
+       "quote": "using the mini-batch size of 32",
+       "block_id": "p6-b8",
+       "page": 6,
+       "bbox": [
+        311.04,
+        35.47,
+        540.2,
+        156.4
+       ],
+       "role": "body",
+       "section_id": "s7",
+       "section": "4 Experiments > 4.2 ImageNet classification",
+       "paragraph_id": "para127",
+       "ok": true,
+       "check": "quote_verbatim"
+      },
+      {
+       "raw": "p7-b4: trained with the initial learning rate of 0.0015",
+       "kind": "block",
+       "quote": "trained with the initial learning rate of 0.0015",
+       "block_id": "p7-b4",
+       "page": 7,
+       "bbox": [
+        72.0,
+        287.11,
+        301.29,
+        312.28
+       ],
+       "role": "body",
+       "section_id": "s9",
+       "section": "4 Experiments > 4.2 ImageNet classification > 4.2.2 Single-Network Classification",
+       "paragraph_id": "para138",
+       "ok": true,
+       "check": "quote_verbatim"
+      },
+      {
+       "raw": "p7-b6: to 0.0075",
+       "kind": "block",
+       "quote": "to 0.0075",
+       "block_id": "p7-b6",
+       "page": 7,
+       "bbox": [
+        72.0,
+        335.71,
+        301.14,
+        396.88
+       ],
+       "role": "body",
+       "section_id": "s9",
+       "section": "4 Experiments > 4.2 ImageNet classification > 4.2.2 Single-Network Classification",
+       "paragraph_id": "para140",
+       "ok": true,
+       "check": "quote_verbatim"
+      },
+      {
+       "raw": "p7-b7: with the initial learning rate 0.045",
+       "kind": "block",
+       "quote": "with the initial learning rate 0.045",
+       "block_id": "p7-b7",
+       "page": 7,
+       "bbox": [
+        72.0,
+        395.95,
+        301.16,
+        445.48
+       ],
+       "role": "body",
+       "section_id": "s9",
+       "section": "4 Experiments > 4.2 ImageNet classification > 4.2.2 Single-Network Classification",
+       "paragraph_id": "para141",
+       "ok": true,
+       "check": "quote_verbatim"
+      }
+     ],
+     "check": {
+      "status": "verified"
+     }
+    }
+   ],
+   "main_findings": [
+    {
+     "text": "BN-x5 只需 Inception 1/14 的步数即达到 72.2% 精度",
+     "anchors": [
+      {
+       "raw": "p7-b12: BN-x5 needs 14 times fewer steps than Inception to reach the 72.2% accuracy",
+       "kind": "block",
+       "quote": "BN-x5 needs 14 times fewer steps than Inception to reach the 72.2% accuracy",
+       "block_id": "p7-b12",
+       "page": 7,
+       "bbox": [
+        72.0,
+        565.63,
+        301.16,
+        681.32
+       ],
+       "role": "body",
+       "section_id": "s9",
+       "section": "4 Experiments > 4.2 ImageNet classification > 4.2.2 Single-Network Classification",
+       "paragraph_id": "para145",
+       "ok": true,
+       "check": "quote_verbatim"
+      }
+     ],
+     "check": {
+      "status": "verified",
+      "small_numbers_unchecked": [
+       "1"
+      ]
+     }
+    },
+    {
+     "text": "BN-x30 最高验证精度 74.8%，到达 72.2% 所需步数为 2.7·10^6（Inception 为 31.0·10^6）",
+     "anchors": [
+      {
+       "raw": "p7-b15: BN-x30 2.7 · 106 74.8%",
+       "kind": "block",
+       "quote": "BN-x30 2.7 · 106 74.8%",
+       "block_id": "p7-b15",
+       "page": 7,
+       "bbox": [
+        328.21,
+        71.47,
+        533.46,
+        144.88
+       ],
+       "role": "body",
+       "section_id": "s9",
+       "section": "4 Experiments > 4.2 ImageNet classification > 4.2.2 Single-Network Classification",
+       "paragraph_id": "para147",
+       "ok": true,
+       "check": "quote_verbatim"
+      },
+      {
+       "raw": "p7-b15: Inception 31.0 · 106 72.2%",
+       "kind": "block",
+       "quote": "Inception 31.0 · 106 72.2%",
+       "block_id": "p7-b15",
+       "page": 7,
+       "bbox": [
+        328.21,
+        71.47,
+        533.46,
+        144.88
+       ],
+       "role": "body",
+       "section_id": "s9",
+       "section": "4 Experiments > 4.2 ImageNet classification > 4.2.2 Single-Network Classification",
+       "paragraph_id": "para147",
+       "ok": true,
+       "check": "quote_verbatim"
+      }
+     ],
+     "check": {
+      "status": "verified",
+      "small_numbers_unchecked": [
+       "6",
+       "6"
+      ]
+     }
+    },
+    {
+     "text": "集成模型 top-5 验证误差 4.9%、测试误差 4.82%，优于此前最佳 4.94%",
+     "anchors": [
+      {
+       "raw": "p7-b19: Here we report a top-5 validation error of 4.9%, and test error of 4.82%",
+       "kind": "block",
+       "quote": "Here we report a top-5 validation error of 4.9%, and test error of 4.82%",
+       "block_id": "p7-b19",
+       "page": 7,
+       "bbox": [
+        311.04,
+        327.19,
+        540.3,
+        448.0
+       ],
+       "role": "body",
+       "section_id": "s10",
+       "section": "4 Experiments > 4.2 ImageNet classification > 4.2.3 Ensemble Classification",
+       "paragraph_id": "para148",
+       "ok": true,
+       "check": "quote_verbatim"
+      },
+      {
+       "raw": "p7-b19: The latter reports the top-5 error of 4.94%",
+       "kind": "block",
+       "quote": "The latter reports the top-5 error of 4.94%",
+       "block_id": "p7-b19",
+       "page": 7,
+       "bbox": [
+        311.04,
+        327.19,
+        540.3,
+        448.0
+       ],
+       "role": "body",
+       "section_id": "s10",
+       "section": "4 Experiments > 4.2 ImageNet classification > 4.2.3 Ensemble Classification",
+       "paragraph_id": "para148",
+       "ok": true,
+       "check": "quote_verbatim"
+      }
+     ],
+     "check": {
+      "status": "verified"
+     }
+    },
+    {
+     "text": "BN-x5-Sigmoid 达到 69.8%，而无 BN 的 sigmoid Inception 不超过 1/1000 精度",
+     "anchors": [
+      {
+       "raw": "p7-b17: BN-x5-Sigmoid achieves the accuracy of 69.8%",
+       "kind": "block",
+       "quote": "BN-x5-Sigmoid achieves the accuracy of 69.8%",
+       "block_id": "p7-b17",
+       "page": 7,
+       "bbox": [
+        311.04,
+        231.31,
+        540.33,
+        292.36
+       ],
+       "role": "body",
+       "section_id": "s9",
+       "section": "4 Experiments > 4.2 ImageNet classification > 4.2.2 Single-Network Classification",
+       "paragraph_id": "para147",
+       "ok": true,
+       "check": "quote_verbatim"
+      }
+     ],
+     "check": {
+      "status": "verified"
+     }
+    }
+   ],
+   "conclusion": [
+    {
+     "text": "BN 通过把归一化纳入网络结构加速训练，可用更高学习率、去掉 Dropout，并在 ImageNet 上超越当时最佳结果",
+     "anchors": [
+      {
+       "raw": "p8-b4: Merely adding Batch Normalization to a state-of-theart image classification model yields a substantial speedup in training",
+       "kind": "block",
+       "quote": "Merely adding Batch Normalization to a state-of-theart image classification model yields a substantial speedup in training",
+       "block_id": "p8-b4",
+       "page": 8,
+       "bbox": [
+        72.0,
+        416.83,
+        301.35,
+        549.76
+       ],
+       "role": "body",
+       "section_id": "s11",
+       "section": "5 Conclusion",
+       "paragraph_id": "para153",
+       "ok": true,
+       "check": "quote_verbatim"
+      }
+     ],
+     "check": {
+      "status": "verified"
+     }
+    }
+   ],
+   "limitations": [
+    {
+     "text": "作者承认尚未探索 BN 的全部可能；BN 使 Jacobian 奇异值接近 1 仅为猜想",
+     "anchors": [
+      {
+       "raw": "p8-b7: we have not explored the full range of possibilities that Batch Normalization potentially enables",
+       "kind": "block",
+       "quote": "we have not explored the full range of possibilities that Batch Normalization potentially enables",
+       "block_id": "p8-b7",
+       "page": 8,
+       "bbox": [
+        311.04,
+        292.39,
+        540.3,
+        485.08
+       ],
+       "role": "body",
+       "section_id": "s11",
+       "section": "5 Conclusion",
+       "paragraph_id": "para155",
+       "ok": true,
+       "check": "quote_verbatim"
+      },
+      {
+       "raw": "p5-b21: We further conjecture that Batch Normalization may lead the layer Jacobians to have singular values close to 1",
+       "kind": "block",
+       "quote": "We further conjecture that Batch Normalization may lead the layer Jacobians to have singular values close to 1",
+       "block_id": "p5-b21",
+       "page": 5,
+       "bbox": [
+        311.04,
+        225.19,
+        540.49,
+        441.64
+       ],
+       "role": "body",
+       "section_id": "sx5",
+       "section": "3 Normalization via Mini-Batch Statistics > 3.3 Batch Normalization enables higher learning rates",
+       "paragraph_id": "para120",
+       "ok": true,
+       "check": "quote_verbatim"
+      }
+     ],
+     "check": {
+      "status": "verified"
+     }
+    }
+   ],
+   "future_work": [
+    {
+     "text": "应用于 RNN、检验能否帮助领域自适应",
+     "anchors": [
+      {
+       "raw": "p8-b7: Our future work includes applications of our method to Recurrent Neural Networks",
+       "kind": "block",
+       "quote": "Our future work includes applications of our method to Recurrent Neural Networks",
+       "block_id": "p8-b7",
+       "page": 8,
+       "bbox": [
+        311.04,
+        292.39,
+        540.3,
+        485.08
+       ],
+       "role": "body",
+       "section_id": "s11",
+       "section": "5 Conclusion",
+       "paragraph_id": "para155",
+       "ok": true,
+       "check": "quote_verbatim"
+      }
+     ],
+     "check": {
+      "status": "verified"
+     }
+    }
+   ]
+  },
+  "section_notes": [
+   {
+    "section_id": "s1",
+    "number": null,
+    "heading": "Abstract",
+    "level": 1,
+    "parent": null,
+    "pages": [
+     1,
+     1
+    ],
+    "block_span": [
+     "p1-b4",
+     "p1-b5"
+    ],
+    "appendix": false,
+    "purpose": [
+     {
+      "text": "提出 BN 以缓解内部协变量偏移、加速训练",
+      "anchors": [
+       {
+        "raw": "p1-b5: We refer to this",
+        "kind": "block",
+        "quote": "We refer to this",
+        "block_id": "p1-b5",
+        "page": 1,
+        "bbox": [
+         72.0,
+         193.39,
+         301.29,
+         457.72
+        ],
+        "role": "body",
+        "section_id": "s1",
+        "section": "Abstract",
+        "paragraph_id": "para1",
+        "ok": true,
+        "check": "quote_verbatim"
+       }
+      ],
+      "check": {
+       "status": "verified"
+      }
+     }
+    ],
+    "method": [],
+    "results": [],
+    "conclusion": [],
+    "transition": [],
+    "key_points": []
+   },
+   {
+    "section_id": "s2",
+    "number": "1",
+    "heading": "1 Introduction",
+    "level": 1,
+    "parent": null,
+    "pages": [
+     1,
+     2
+    ],
+    "block_span": [
+     "p1-b6",
+     "p2-b6"
+    ],
+    "appendix": false,
+    "purpose": [
+     {
+      "text": "从 SGD 与 mini-batch 出发，引出层输入分布变化问题并定义 ICS",
+      "anchors": [
+       {
+        "raw": "p2-b5: We refer to the change in the distributions of internal nodes of a deep network, in the course of training, as Internal Covariate Shift",
+        "kind": "block",
+        "quote": "We refer to the change in the distributions of internal nodes of a deep network, in the course of training, as Internal Covariate Shift",
+        "block_id": "p2-b5",
+        "page": 2,
+        "bbox": [
+         72.0,
+         381.79,
+         301.36,
+         610.24
+        ],
+        "role": "body",
+        "section_id": "s2",
+        "section": "1 Introduction",
+        "paragraph_id": "para19",
+        "ok": true,
+        "check": "quote_verbatim"
+       }
+      ],
+      "check": {
+       "status": "verified"
+      }
+     }
+    ],
+    "method": [],
+    "results": [],
+    "conclusion": [],
+    "transition": [
+     {
+      "text": "预告第 4.2 节用 7% 的训练步数匹配 Inception",
+      "anchors": [
+       {
+        "raw": "p2-b6: show that we can match its performance using only 7% of the training steps",
+        "kind": "block",
+        "quote": "show that we can match its performance using only 7% of the training steps",
+        "block_id": "p2-b6",
+        "page": 2,
+        "bbox": [
+         72.0,
+         625.87,
+         301.24,
+         722.8
+        ],
+        "role": "body",
+        "section_id": "s2",
+        "section": "1 Introduction",
+        "paragraph_id": "para20",
+        "ok": true,
+        "check": "quote_verbatim"
+       }
+      ],
+      "check": {
+       "status": "verified"
+      }
+     }
+    ],
+    "key_points": []
+   },
+   {
+    "section_id": "sx1",
+    "number": "2",
+    "heading": "2 Towards Reducing Internal Covariate Shift",
+    "level": 1,
+    "parent": null,
+    "pages": [
+     2,
+     3
+    ],
+    "block_span": [
+     "p2-b7",
+     "p3-b8"
+    ],
+    "appendix": false,
+    "purpose": [],
+    "method": [
+     {
+      "text": "讨论白化：若优化忽略归一化依赖，偏置 b 会无限增长",
+      "anchors": [
+       {
+        "raw": "p2-b10: As the training continues, b will grow",
+        "kind": "block",
+        "quote": "As the training continues, b will grow",
+        "block_id": "p2-b10",
+        "page": 2,
+        "bbox": [
+         311.04,
+         451.23,
+         540.25,
+         612.4
+        ],
+        "role": "body",
+        "section_id": "sx1",
+        "section": "2 Towards Reducing Internal Covariate Shift",
+        "paragraph_id": "para24",
+        "ok": true,
+        "check": "quote_verbatim"
+       }
+      ],
+      "check": {
+       "status": "verified"
+      }
+     }
+    ],
+    "results": [],
+    "conclusion": [
+     {
+      "text": "完整白化代价高（需协方差矩阵及其逆平方根），促使下一节简化",
+      "anchors": [
+       {
+        "raw": "p3-b7: whitening the layer inputs is expensive",
+        "kind": "block",
+        "quote": "whitening the layer inputs is expensive",
+        "block_id": "p3-b7",
+        "page": 3,
+        "bbox": [
+         72.0,
+         175.15,
+         301.28,
+         296.08
+        ],
+        "role": "body",
+        "section_id": "sx1",
+        "section": "2 Towards Reducing Internal Covariate Shift",
+        "paragraph_id": "para29",
+        "ok": true,
+        "check": "quote_verbatim"
+       }
+      ],
+      "check": {
+       "status": "verified"
+      }
+     }
+    ],
+    "transition": [],
+    "key_points": []
+   },
+   {
+    "section_id": "sx2",
+    "number": "3",
+    "heading": "3 Normalization via Mini-Batch Statistics",
+    "level": 1,
+    "parent": null,
+    "pages": [
+     3,
+     4
+    ],
+    "block_span": [
+     "p3-b9",
+     "p4-b43"
+    ],
+    "appendix": false,
+    "purpose": [],
+    "method": [
+     {
+      "text": "两项简化：逐维归一化；用 mini-batch 统计量",
+      "anchors": [
+       {
+        "raw": "p3-b10: we make two necessary simplifications",
+        "kind": "block",
+        "quote": "we make two necessary simplifications",
+        "block_id": "p3-b10",
+        "page": 3,
+        "bbox": [
+         72.0,
+         463.99,
+         301.16,
+         561.04
+        ],
+        "role": "body",
+        "section_id": "sx2",
+        "section": "3 Normalization via Mini-Batch Statistics",
+        "paragraph_id": "para32",
+        "ok": true,
+        "check": "quote_verbatim"
+       }
+      ],
+      "check": {
+       "status": "verified"
+      }
+     }
+    ],
+    "results": [],
+    "conclusion": [],
+    "transition": [],
+    "key_points": []
+   },
+   {
+    "section_id": "sx3",
+    "number": "3.1",
+    "heading": "3.1 Training and Inference with Batch-Normalized Networks",
+    "level": 2,
+    "parent": "sx2",
+    "pages": [
+     4,
+     4
+    ],
+    "block_span": [
+     "p4-b44",
+     "p4-b95"
+    ],
+    "appendix": false,
+    "purpose": [],
+    "method": [
+     {
+      "text": "训练用 mini-batch 统计量，推理用总体统计量，归一化变为确定性线性变换",
+      "anchors": [
+       {
+        "raw": "p4-b51: the normalization is simply a linear transform applied to each activation",
+        "kind": "block",
+        "quote": "the normalization is simply a linear transform applied to each activation",
+        "block_id": "p4-b51",
+        "page": 4,
+        "bbox": [
+         311.04,
+         197.35,
+         540.21,
+         294.28
+        ],
+        "role": "body",
+        "section_id": "sx3",
+        "section": "3 Normalization via Mini-Batch Statistics > 3.1 Training and Inference with Batch-Normalized Networks",
+        "paragraph_id": "para75",
+        "ok": true,
+        "check": "quote_verbatim"
+       }
+      ],
+      "check": {
+       "status": "verified"
+      }
+     }
+    ],
+    "results": [],
+    "conclusion": [],
+    "transition": [],
+    "key_points": []
+   },
+   {
+    "section_id": "sx4",
+    "number": "3.2",
+    "heading": "3.2 Batch-Normalized Convolutional Networks",
+    "level": 2,
+    "parent": "sx2",
+    "pages": [
+     4,
+     5
+    ],
+    "block_span": [
+     "p4-b96",
+     "p5-b7"
+    ],
+    "appendix": false,
+    "purpose": [],
+    "method": [
+     {
+      "text": "卷积层中同一特征图不同位置按相同方式归一化",
+      "anchors": [
+       {
+        "raw": "p5-b7: so that different elements of the same feature map, at different locations, are normalized in the same way",
+        "kind": "block",
+        "quote": "so that different elements of the same feature map, at different locations, are normalized in the same way",
+        "block_id": "p5-b7",
+        "page": 5,
+        "bbox": [
+         72.0,
+         361.51,
+         301.33,
+         530.2
+        ],
+        "role": "body",
+        "section_id": "sx4",
+        "section": "3 Normalization via Mini-Batch Statistics > 3.2 Batch-Normalized Convolutional Networks",
+        "paragraph_id": "para113",
+        "ok": true,
+        "check": "quote_verbatim"
+       }
+      ],
+      "check": {
+       "status": "verified"
+      }
+     }
+    ],
+    "results": [],
+    "conclusion": [],
+    "transition": [],
+    "key_points": []
+   },
+   {
+    "section_id": "sx5",
+    "number": "3.3",
+    "heading": "3.3 Batch Normalization enables higher learning rates",
+    "level": 2,
+    "parent": "sx2",
+    "pages": [
+     5,
+     5
+    ],
+    "block_span": [
+     "p5-b8",
+     "p5-b21"
+    ],
+    "appendix": false,
+    "purpose": [],
+    "method": [],
+    "results": [
+     {
+      "text": "反向传播不受参数尺度影响，可用更高学习率",
+      "anchors": [
+       {
+        "raw": "p5-b11: backpropagation through a layer is unaffected by the scale of its parameters",
+        "kind": "block",
+        "quote": "backpropagation through a layer is unaffected by the scale of its parameters",
+        "block_id": "p5-b11",
+        "page": 5,
+        "bbox": [
+         311.04,
+         35.47,
+         540.2,
+         84.64
+        ],
+        "role": "body",
+        "section_id": "sx5",
+        "section": "3 Normalization via Mini-Batch Statistics > 3.3 Batch Normalization enables higher learning rates",
+        "paragraph_id": "para116",
+        "ok": true,
+        "check": "quote_verbatim"
+       }
+      ],
+      "check": {
+       "status": "verified"
+      }
+     }
+    ],
+    "conclusion": [],
+    "transition": [],
+    "key_points": []
+   },
+   {
+    "section_id": "sx6",
+    "number": "3.4",
+    "heading": "3.4 Batch Normalization regularizes the model",
+    "level": 2,
+    "parent": "sx2",
+    "pages": [
+     5,
+     5
+    ],
+    "block_span": [
+     "p5-b22",
+     "p5-b23"
+    ],
+    "appendix": false,
+    "purpose": [],
+    "method": [],
+    "results": [],
+    "conclusion": [
+     {
+      "text": "BN 有正则化效果，可减少或去掉 Dropout",
+      "anchors": [
+       {
+        "raw": "p5-b23: we found this effect to be advantageous to the generalization of the network",
+        "kind": "block",
+        "quote": "we found this effect to be advantageous to the generalization of the network",
+        "block_id": "p5-b23",
+        "page": 5,
+        "bbox": [
+         311.04,
+         489.55,
+         540.4,
+         598.48
+        ],
+        "role": "body",
+        "section_id": "sx6",
+        "section": "3 Normalization via Mini-Batch Statistics > 3.4 Batch Normalization regularizes the model",
+        "paragraph_id": "para122",
+        "ok": true,
+        "check": "quote_verbatim"
+       }
+      ],
+      "check": {
+       "status": "verified"
+      }
+     }
+    ],
+    "transition": [],
+    "key_points": []
+   },
+   {
+    "section_id": "s5",
+    "number": "4",
+    "heading": "4 Experiments",
+    "level": 1,
+    "parent": null,
+    "pages": [
+     5,
+     5
+    ],
+    "block_span": [
+     "p5-b24",
+     "p5-b24"
+    ],
+    "appendix": false,
+    "purpose": [],
+    "method": [],
+    "results": [],
+    "conclusion": [],
+    "transition": [],
+    "key_points": []
+   },
+   {
+    "section_id": "s6",
+    "number": "4.1",
+    "heading": "4.1 Activations over time",
+    "level": 2,
+    "parent": "s5",
+    "pages": [
+     5,
+     6
+    ],
+    "block_span": [
+     "p5-b25",
+     "p6-b5"
+    ],
+    "appendix": false,
+    "purpose": [],
+    "method": [],
+    "results": [
+     {
+      "text": "MNIST 上 BN 网络测试精度更高，sigmoid 输入分布更稳定",
+      "anchors": [
+       {
+        "raw": "p6-b4: The batch-normalized network enjoys the higher test accuracy",
+        "kind": "block",
+        "quote": "The batch-normalized network enjoys the higher test accuracy",
+        "block_id": "p6-b4",
+        "page": 6,
+        "bbox": [
+         72.0,
+         369.07,
+         301.36,
+         442.12
+        ],
+        "role": "body",
+        "section_id": "s6",
+        "section": "4 Experiments > 4.1 Activations over time",
+        "paragraph_id": "para125",
+        "ok": true,
+        "check": "quote_verbatim"
+       }
+      ],
+      "check": {
+       "status": "verified"
+      }
+     }
+    ],
+    "conclusion": [],
+    "transition": [],
+    "key_points": []
+   },
+   {
+    "section_id": "s7",
+    "number": "4.2",
+    "heading": "4.2 ImageNet classification",
+    "level": 2,
+    "parent": "s5",
+    "pages": [
+     6,
+     6
+    ],
+    "block_span": [
+     "p6-b6",
+     "p6-b9"
+    ],
+    "appendix": false,
+    "purpose": [],
+    "method": [
+     {
+      "text": "在 Inception 变体上加 BN，mini-batch 32",
+      "anchors": [
+       {
+        "raw": "p6-b8: using the mini-batch size of 32",
+        "kind": "block",
+        "quote": "using the mini-batch size of 32",
+        "block_id": "p6-b8",
+        "page": 6,
+        "bbox": [
+         311.04,
+         35.47,
+         540.2,
+         156.4
+        ],
+        "role": "body",
+        "section_id": "s7",
+        "section": "4 Experiments > 4.2 ImageNet classification",
+        "paragraph_id": "para127",
+        "ok": true,
+        "check": "quote_verbatim"
+       }
+      ],
+      "check": {
+       "status": "verified"
+      }
+     }
+    ],
+    "results": [],
+    "conclusion": [],
+    "transition": [],
+    "key_points": []
+   },
+   {
+    "section_id": "s8",
+    "number": "4.2.1",
+    "heading": "4.2.1 Accelerating BN Networks",
+    "level": 3,
+    "parent": "s7",
+    "pages": [
+     6,
+     7
+    ],
+    "block_span": [
+     "p6-b10",
+     "p7-b1"
+    ],
+    "appendix": false,
+    "purpose": [],
+    "method": [
+     {
+      "text": "配套修改：提高学习率、去 Dropout、L2 权重降为 1/5、学习率衰减快 6 倍、去 LRN、更彻底打乱、减少光度扰动",
+      "anchors": [
+       {
+        "raw": "p6-b14: the weight of this loss is reduced by a factor of 5",
+        "kind": "block",
+        "quote": "the weight of this loss is reduced by a factor of 5",
+        "block_id": "p6-b14",
+        "page": 6,
+        "bbox": [
+         311.04,
+         402.55,
+         540.2,
+         463.72
+        ],
+        "role": "body",
+        "section_id": "s8",
+        "section": "4 Experiments > 4.2 ImageNet classification > 4.2.1 Accelerating BN Networks",
+        "paragraph_id": "para132",
+        "ok": true,
+        "check": "quote_verbatim"
+       },
+       {
+        "raw": "p6-b15: we lower the learning rate 6 times faster",
+        "kind": "block",
+        "quote": "we lower the learning rate 6 times faster",
+        "block_id": "p6-b15",
+        "page": 6,
+        "bbox": [
+         311.04,
+         464.35,
+         540.2,
+         513.52
+        ],
+        "role": "body",
+        "section_id": "s8",
+        "section": "4 Experiments > 4.2 ImageNet classification > 4.2.1 Accelerating BN Networks",
+        "paragraph_id": "para133",
+        "ok": true,
+        "check": "quote_verbatim"
+       }
+      ],
+      "check": {
+       "status": "verified",
+       "small_numbers_unchecked": [
+        "1"
+       ]
+      }
+     }
+    ],
+    "results": [],
+    "conclusion": [],
+    "transition": [],
+    "key_points": []
+   },
+   {
+    "section_id": "s9",
+    "number": "4.2.2",
+    "heading": "4.2.2 Single-Network Classification",
+    "level": 3,
+    "parent": "s7",
+    "pages": [
+     7,
+     7
+    ],
+    "block_span": [
+     "p7-b2",
+     "p7-b17"
+    ],
+    "appendix": false,
+    "purpose": [],
+    "method": [],
+    "results": [
+     {
+      "text": "BN-Baseline 不到一半步数即匹配 Inception",
+      "anchors": [
+       {
+        "raw": "p7-b12: we match the accuracy of Inception in less than half the number of training steps",
+        "kind": "block",
+        "quote": "we match the accuracy of Inception in less than half the number of training steps",
+        "block_id": "p7-b12",
+        "page": 7,
+        "bbox": [
+         72.0,
+         565.63,
+         301.16,
+         681.32
+        ],
+        "role": "body",
+        "section_id": "s9",
+        "section": "4 Experiments > 4.2 ImageNet classification > 4.2.2 Single-Network Classification",
+        "paragraph_id": "para145",
+        "ok": true,
+        "check": "quote_verbatim"
+       }
+      ],
+      "check": {
+       "status": "verified"
+      }
+     }
+    ],
+    "conclusion": [],
+    "transition": [],
+    "key_points": []
+   },
+   {
+    "section_id": "s10",
+    "number": "4.2.3",
+    "heading": "4.2.3 Ensemble Classification",
+    "level": 3,
+    "parent": "s7",
+    "pages": [
+     7,
+     7
+    ],
+    "block_span": [
+     "p7-b18",
+     "p7-b21"
+    ],
+    "appendix": false,
+    "purpose": [],
+    "method": [],
+    "results": [
+     {
+      "text": "6 个基于 BN-x30 的网络集成，测试 top-5 误差 4.82%",
+      "anchors": [
+       {
+        "raw": "p7-b20: For our ensemble, we used 6 networks",
+        "kind": "block",
+        "quote": "For our ensemble, we used 6 networks",
+        "block_id": "p7-b20",
+        "page": 7,
+        "bbox": [
+         311.04,
+         447.07,
+         540.57,
+         591.88
+        ],
+        "role": "body",
+        "section_id": "s10",
+        "section": "4 Experiments > 4.2 ImageNet classification > 4.2.3 Ensemble Classification",
+        "paragraph_id": "para149",
+        "ok": true,
+        "check": "quote_verbatim"
+       },
+       {
+        "raw": "p7-b19: test error of 4.82%",
+        "kind": "block",
+        "quote": "test error of 4.82%",
+        "block_id": "p7-b19",
+        "page": 7,
+        "bbox": [
+         311.04,
+         327.19,
+         540.3,
+         448.0
+        ],
+        "role": "body",
+        "section_id": "s10",
+        "section": "4 Experiments > 4.2 ImageNet classification > 4.2.3 Ensemble Classification",
+        "paragraph_id": "para148",
+        "ok": true,
+        "check": "quote_verbatim"
+       }
+      ],
+      "check": {
+       "status": "verified"
+      }
+     }
+    ],
+    "conclusion": [],
+    "transition": [],
+    "key_points": []
+   },
+   {
+    "section_id": "s11",
+    "number": "5",
+    "heading": "5 Conclusion",
+    "level": 1,
+    "parent": null,
+    "pages": [
+     7,
+     8
+    ],
+    "block_span": [
+     "p7-b22",
+     "p8-b7"
+    ],
+    "appendix": false,
+    "purpose": [],
+    "method": [],
+    "results": [],
+    "conclusion": [
+     {
+      "text": "总结：BN 在架构内归一化，可配合任意优化方法；并说明与 standardization layer 的区别",
+      "anchors": [
+       {
+        "raw": "p8-b3: incorporating this normalization in the network architecture itself",
+        "kind": "block",
+        "quote": "incorporating this normalization in the network architecture itself",
+        "block_id": "p8-b3",
+        "page": 8,
+        "bbox": [
+         72.0,
+         196.03,
+         301.28,
+         412.48
+        ],
+        "role": "body",
+        "section_id": "s11",
+        "section": "5 Conclusion",
+        "paragraph_id": "para152",
+        "ok": true,
+        "check": "quote_verbatim"
+       }
+      ],
+      "check": {
+       "status": "verified"
+      }
+     }
+    ],
+    "transition": [],
+    "key_points": []
+   },
+   {
+    "section_id": "s13",
+    "number": null,
+    "heading": "Appendix",
+    "level": 1,
+    "parent": null,
+    "pages": [
+     9,
+     11
+    ],
+    "block_span": [
+     "p9-b41",
+     "p11-b9"
+    ],
+    "appendix": true,
+    "purpose": [],
+    "method": [],
+    "results": [],
+    "conclusion": [],
+    "transition": [],
+    "key_points": [],
+    "skip_reason": "appendix: Inception variant details, not summarised"
+   }
+  ],
+  "knowledge_points": [
+   {
+    "term": "Internal Covariate Shift",
+    "aliases": [
+     "ICS",
+     "内部协变量偏移"
+    ],
+    "kind": "concept",
+    "definition": "训练中由于网络参数变化导致网络激活分布的变化",
+    "section_id": "sx1",
+    "abbreviation": {
+     "abbr": "ICS",
+     "expansion_in_paper": null,
+     "status": "expansion_not_printed"
+    },
+    "text": "训练中由于网络参数变化导致网络激活分布的变化",
+    "anchors": [
+     {
+      "raw": "p2-b8: We define Internal Covariate Shift as the change in the distribution of network activations due to the change in network parameters during training",
+      "kind": "block",
+      "quote": "We define Internal Covariate Shift as the change in the distribution of network activations due to the change in network parameters during training",
+      "block_id": "p2-b8",
+      "page": 2,
+      "bbox": [
+       311.04,
+       80.95,
+       540.21,
+       273.64
+      ],
+      "role": "body",
+      "section_id": "sx1",
+      "section": "2 Towards Reducing Internal Covariate Shift",
+      "paragraph_id": "para22",
+      "ok": true,
+      "check": "quote_verbatim"
+     }
+    ],
+    "check": {
+     "status": "needs_review",
+     "review": [
+      "abbreviation expansion not printed in the paper"
+     ]
+    }
+   },
+   {
+    "term": "BN",
+    "aliases": [
+     "Batch Normalization",
+     "批归一化"
+    ],
+    "kind": "method",
+    "definition": "用 mini-batch 统计量对激活归一化并缩放平移",
+    "section_id": "sx2",
+    "other_definitions": [
+     "BN transform y = BNγ,β(x)"
+    ],
+    "definition_conflict": "several definitions merged; check they agree",
+    "abbreviation": {
+     "abbr": "BN",
+     "expansion_in_paper": "Alg",
+     "status": "found_in_text"
+    },
+    "text": "用 mini-batch 统计量对激活归一化并缩放平移",
+    "anchors": [
+     {
+      "raw": "p3-b23: as the Batch Normalizing Transform",
+      "kind": "block",
+      "quote": "as the Batch Normalizing Transform",
+      "block_id": "p3-b23",
+      "page": 3,
+      "bbox": [
+       311.04,
+       448.51,
+       540.13,
+       485.68
+      ],
+      "role": "body",
+      "section_id": "sx2",
+      "section": "3 Normalization via Mini-Batch Statistics",
+      "paragraph_id": "para41",
+      "ok": true,
+      "check": "quote_verbatim"
+     },
+     {
+      "raw": "p3-b44: In the notation y = BNγ,β(x)",
+      "kind": "block",
+      "quote": "In the notation y = BNγ,β(x)",
+      "block_id": "p3-b44",
+      "page": 3,
+      "bbox": [
+       311.04,
+       697.51,
+       540.2,
+       723.18
+      ],
+      "role": "body",
+      "section_id": "sx2",
+      "section": "3 Normalization via Mini-Batch Statistics",
+      "paragraph_id": "para52",
+      "ok": true,
+      "check": "quote_verbatim"
+     }
+    ],
+    "check": {
+     "status": "verified"
+    }
+   },
+   {
+    "term": "γ, β",
+    "aliases": [
+     "scale and shift parameters"
+    ],
+    "kind": "variable",
+    "definition": "每个激活的可学习缩放与平移参数",
+    "section_id": "sx2",
+    "text": "每个激活的可学习缩放与平移参数",
+    "anchors": [
+     {
+      "raw": "p3-b14: a pair of parameters γ(k), β(k), which scale and shift the normalized value",
+      "kind": "block",
+      "quote": "a pair of parameters γ(k), β(k), which scale and shift the normalized value",
+      "block_id": "p3-b14",
+      "page": 3,
+      "bbox": [
+       311.04,
+       35.47,
+       540.28,
+       60.76
+      ],
+      "role": "body",
+      "section_id": "sx2",
+      "section": "3 Normalization via Mini-Batch Statistics",
+      "paragraph_id": "para34",
+      "ok": true,
+      "check": "quote_verbatim"
+     }
+    ],
+    "check": {
+     "status": "verified"
+    }
+   }
+  ],
+  "outline": [
+   {
+    "id": "s1",
+    "level": 1,
+    "number": null,
+    "title": "Abstract",
+    "parent": null,
+    "pages": [
+     1,
+     1
+    ],
+    "appendix": false,
+    "pseudo": null
+   },
+   {
+    "id": "s2",
+    "level": 1,
+    "number": "1",
+    "title": "Introduction",
+    "parent": null,
+    "pages": [
+     1,
+     2
+    ],
+    "appendix": false,
+    "pseudo": null
+   },
+   {
+    "id": "sx1",
+    "level": 1,
+    "number": "2",
+    "title": "Towards Reducing Internal Covariate Shift",
+    "parent": null,
+    "pages": [
+     2,
+     3
+    ],
+    "appendix": false,
+    "pseudo": null
+   },
+   {
+    "id": "sx2",
+    "level": 1,
+    "number": "3",
+    "title": "Normalization via Mini-Batch Statistics",
+    "parent": null,
+    "pages": [
+     3,
+     4
+    ],
+    "appendix": false,
+    "pseudo": null
+   },
+   {
+    "id": "sx3",
+    "level": 2,
+    "number": "3.1",
+    "title": "Training and Inference with Batch-Normalized Networks",
+    "parent": "sx2",
+    "pages": [
+     4,
+     4
+    ],
+    "appendix": false,
+    "pseudo": null
+   },
+   {
+    "id": "sx4",
+    "level": 2,
+    "number": "3.2",
+    "title": "Batch-Normalized Convolutional Networks",
+    "parent": "sx2",
+    "pages": [
+     4,
+     5
+    ],
+    "appendix": false,
+    "pseudo": null
+   },
+   {
+    "id": "sx5",
+    "level": 2,
+    "number": "3.3",
+    "title": "Batch Normalization enables higher learning rates",
+    "parent": "sx2",
+    "pages": [
+     5,
+     5
+    ],
+    "appendix": false,
+    "pseudo": null
+   },
+   {
+    "id": "sx6",
+    "level": 2,
+    "number": "3.4",
+    "title": "Batch Normalization regularizes the model",
+    "parent": "sx2",
+    "pages": [
+     5,
+     5
+    ],
+    "appendix": false,
+    "pseudo": null
+   },
+   {
+    "id": "s5",
+    "level": 1,
+    "number": "4",
+    "title": "Experiments",
+    "parent": null,
+    "pages": [
+     5,
+     5
+    ],
+    "appendix": false,
+    "pseudo": null
+   },
+   {
+    "id": "s6",
+    "level": 2,
+    "number": "4.1",
+    "title": "Activations over time",
+    "parent": "s5",
+    "pages": [
+     5,
+     6
+    ],
+    "appendix": false,
+    "pseudo": null
+   },
+   {
+    "id": "s7",
+    "level": 2,
+    "number": "4.2",
+    "title": "ImageNet classification",
+    "parent": "s5",
+    "pages": [
+     6,
+     6
+    ],
+    "appendix": false,
+    "pseudo": null
+   },
+   {
+    "id": "s8",
+    "level": 3,
+    "number": "4.2.1",
+    "title": "Accelerating BN Networks",
+    "parent": "s7",
+    "pages": [
+     6,
+     7
+    ],
+    "appendix": false,
+    "pseudo": null
+   },
+   {
+    "id": "s9",
+    "level": 3,
+    "number": "4.2.2",
+    "title": "Single-Network Classification",
+    "parent": "s7",
+    "pages": [
+     7,
+     7
+    ],
+    "appendix": false,
+    "pseudo": null
+   },
+   {
+    "id": "s10",
+    "level": 3,
+    "number": "4.2.3",
+    "title": "Ensemble Classification",
+    "parent": "s7",
+    "pages": [
+     7,
+     7
+    ],
+    "appendix": false,
+    "pseudo": null
+   },
+   {
+    "id": "s11",
+    "level": 1,
+    "number": "5",
+    "title": "Conclusion",
+    "parent": null,
+    "pages": [
+     7,
+     8
+    ],
+    "appendix": false,
+    "pseudo": null
+   },
+   {
+    "id": "s12",
+    "level": 1,
+    "number": null,
+    "title": "References",
+    "parent": null,
+    "pages": [
+     8,
+     9
+    ],
+    "appendix": false,
+    "pseudo": null
+   },
+   {
+    "id": "s13",
+    "level": 1,
+    "number": null,
+    "title": "Appendix",
+    "parent": null,
+    "pages": [
+     9,
+     11
+    ],
+    "appendix": true,
+    "pseudo": null
+   }
+  ]
+ },
+ "evidence": [
+  {
+   "field": "card.title",
+   "kind": "block",
+   "page": 1,
+   "block_id": "p1-b1",
+   "bbox": [
+    90.24,
+    59.75,
+    521.73,
+    82.72
+   ],
+   "quote": "Batch Normalization: Accelerating Deep Network Training by",
+   "check": "quote_verbatim"
+  },
+  {
+   "field": "card.title",
+   "kind": "block",
+   "page": 1,
+   "block_id": "p1-b2",
+   "bbox": [
+    189.96,
+    81.59,
+    422.15,
+    104.56
+   ],
+   "quote": "Reducing Internal Covariate Shift",
+   "check": "quote_verbatim"
+  },
+  {
+   "field": "card.authors",
+   "kind": "block",
+   "page": 1,
+   "block_id": "p1-b3",
+   "bbox": [
+    127.68,
+    116.05,
+    286.44,
+    145.92
+   ],
+   "quote": "Sergey Ioffe Google Inc., sioffe@google.com",
+   "check": "quote_verbatim"
+  },
+  {
+   "field": "card.research_question",
+   "kind": "block",
+   "page": 2,
+   "block_id": "p2-b5",
+   "paragraph_id": "para19",
+   "bbox": [
+    72.0,
+    381.79,
+    301.36,
+    610.24
+   ],
+   "section_id": "s2",
+   "section": "1 Introduction",
+   "quote": "We propose a new mechanism, which we call Batch Normalization, that takes a step towards reducing internal covariate shift",
+   "check": "quote_verbatim"
+  },
+  {
+   "field": "card.motivation_gap",
+   "kind": "block",
+   "page": 1,
+   "block_id": "p1-b5",
+   "paragraph_id": "para1",
+   "bbox": [
+    72.0,
+    193.39,
+    301.29,
+    457.72
+   ],
+   "section_id": "s1",
+   "section": "Abstract",
+   "quote": "This slows down the training by requiring lower learning rates and careful parameter initialization",
+   "check": "quote_verbatim"
+  },
+  {
+   "field": "card.data",
+   "kind": "block",
+   "page": 5,
+   "block_id": "p5-b26",
+   "paragraph_id": "para123",
+   "bbox": [
+    311.04,
+    661.63,
+    540.18,
+    722.8
+   ],
+   "section_id": "s6",
+   "section": "4 Experiments > 4.1 Activations over time",
+   "quote": "predicting the digit class on the MNIST dataset",
+   "check": "quote_verbatim"
+  },
+  {
+   "field": "card.data",
+   "kind": "block",
+   "page": 6,
+   "block_id": "p6-b3",
+   "paragraph_id": "para124",
+   "bbox": [
+    72.0,
+    224.71,
+    301.29,
+    369.52
+   ],
+   "section_id": "s6",
+   "section": "4 Experiments > 4.1 Activations over time",
+   "quote": "We trained the network for 50000 steps, with 60 examples per mi",
+   "check": "quote_verbatim"
+  },
+  {
+   "field": "card.data",
+   "kind": "block",
+   "page": 7,
+   "block_id": "p7-b3",
+   "paragraph_id": "para137",
+   "bbox": [
+    72.0,
+    250.75,
+    301.14,
+    287.92
+   ],
+   "section_id": "s9",
+   "section": "4 Experiments > 4.2 ImageNet classification > 4.2.2 Single-Network Classification",
+   "quote": "all trained on the LSVRC2012 training data, and tested on the validation data",
+   "check": "quote_verbatim"
+  },
+  {
+   "field": "card.data",
+   "kind": "block",
+   "page": 6,
+   "block_id": "p6-b7",
+   "paragraph_id": "para127",
+   "bbox": [
+    72.0,
+    577.99,
+    301.18,
+    722.8
+   ],
+   "section_id": "s7",
+   "section": "4 Experiments > 4.2 ImageNet classification",
+   "quote": "out of 1000 possibilities",
+   "check": "quote_verbatim"
+  },
+  {
+   "field": "card.data",
+   "kind": "figure",
+   "page": 8,
+   "figure": "Figure 4",
+   "section_id": "s11",
+   "section": "5 Conclusion",
+   "quote": "provided validation set comprising 50000 images",
+   "check": "quote_in_caption"
+  },
+  {
+   "field": "card.method",
+   "kind": "block",
+   "page": 3,
+   "block_id": "p3-b10",
+   "paragraph_id": "para32",
+   "bbox": [
+    72.0,
+    463.99,
+    301.16,
+    561.04
+   ],
+   "section_id": "sx2",
+   "section": "3 Normalization via Mini-Batch Statistics",
+   "quote": "we will normalize each scalar feature independently, by making it have the mean of zero and the variance of 1",
+   "check": "quote_verbatim"
+  },
+  {
+   "field": "card.method",
+   "kind": "block",
+   "page": 3,
+   "block_id": "p3-b14",
+   "paragraph_id": "para34",
+   "bbox": [
+    311.04,
+    35.47,
+    540.28,
+    60.76
+   ],
+   "section_id": "sx2",
+   "section": "3 Normalization via Mini-Batch Statistics",
+   "quote": "a pair of parameters γ(k), β(k), which scale and shift the normalized value",
+   "check": "quote_verbatim"
+  },
+  {
+   "field": "card.method",
+   "kind": "block",
+   "page": 3,
+   "block_id": "p3-b18",
+   "paragraph_id": "para37",
+   "bbox": [
+    311.04,
+    149.23,
+    540.2,
+    317.92
+   ],
+   "section_id": "sx2",
+   "section": "3 Normalization via Mini-Batch Statistics",
+   "quote": "each mini-batch produces estimates of the mean and variance",
+   "check": "quote_verbatim"
+  },
+  {
+   "field": "card.method",
+   "kind": "block",
+   "page": 4,
+   "block_id": "p4-b48",
+   "paragraph_id": "para73",
+   "bbox": [
+    311.04,
+    137.47,
+    540.08,
+    186.64
+   ],
+   "section_id": "sx3",
+   "section": "3 Normalization via Mini-Batch Statistics > 3.1 Training and Inference with Batch-Normalized Networks",
+   "quote": "using the population, rather than mini-batch, statistics",
+   "check": "quote_verbatim"
+  },
+  {
+   "field": "card.conditions",
+   "kind": "block",
+   "page": 4,
+   "block_id": "p4-b45",
+   "paragraph_id": "para72",
+   "bbox": [
+    72.0,
+    637.75,
+    301.26,
+    722.8
+   ],
+   "section_id": "sx3",
+   "section": "3 Normalization via Mini-Batch Statistics > 3.1 Training and Inference with Batch-Normalized Networks",
+   "quote": "Stochastic Gradient Descent with a mini-batch size m > 1",
+   "check": "quote_verbatim"
+  },
+  {
+   "field": "card.conditions",
+   "kind": "block",
+   "page": 5,
+   "block_id": "p5-b3",
+   "paragraph_id": "para110",
+   "bbox": [
+    72.0,
+    90.91,
+    301.45,
+    247.6
+   ],
+   "section_id": "sx4",
+   "section": "3 Normalization via Mini-Batch Statistics > 3.2 Batch-Normalized Convolutional Networks",
+   "quote": "We add the BN transform immediately before the nonlinearity, by normalizing x = Wu+b",
+   "check": "quote_verbatim"
+  },
+  {
+   "field": "card.conditions",
+   "kind": "block",
+   "page": 5,
+   "block_id": "p5-b7",
+   "paragraph_id": "para113",
+   "bbox": [
+    72.0,
+    361.51,
+    301.33,
+    530.2
+   ],
+   "section_id": "sx4",
+   "section": "3 Normalization via Mini-Batch Statistics > 3.2 Batch-Normalized Convolutional Networks",
+   "quote": "we jointly normalize all the activations in a minibatch, over all locations",
+   "check": "quote_verbatim"
+  },
+  {
+   "field": "card.conditions",
+   "kind": "block",
+   "page": 6,
+   "block_id": "p6-b8",
+   "paragraph_id": "para127",
+   "bbox": [
+    311.04,
+    35.47,
+    540.2,
+    156.4
+   ],
+   "section_id": "s7",
+   "section": "4 Experiments > 4.2 ImageNet classification",
+   "quote": "using the mini-batch size of 32",
+   "check": "quote_verbatim"
+  },
+  {
+   "field": "card.conditions",
+   "kind": "block",
+   "page": 7,
+   "block_id": "p7-b4",
+   "paragraph_id": "para138",
+   "bbox": [
+    72.0,
+    287.11,
+    301.29,
+    312.28
+   ],
+   "section_id": "s9",
+   "section": "4 Experiments > 4.2 ImageNet classification > 4.2.2 Single-Network Classification",
+   "quote": "trained with the initial learning rate of 0.0015",
+   "check": "quote_verbatim"
+  },
+  {
+   "field": "card.conditions",
+   "kind": "block",
+   "page": 7,
+   "block_id": "p7-b6",
+   "paragraph_id": "para140",
+   "bbox": [
+    72.0,
+    335.71,
+    301.14,
+    396.88
+   ],
+   "section_id": "s9",
+   "section": "4 Experiments > 4.2 ImageNet classification > 4.2.2 Single-Network Classification",
+   "quote": "to 0.0075",
+   "check": "quote_verbatim"
+  },
+  {
+   "field": "card.conditions",
+   "kind": "block",
+   "page": 7,
+   "block_id": "p7-b7",
+   "paragraph_id": "para141",
+   "bbox": [
+    72.0,
+    395.95,
+    301.16,
+    445.48
+   ],
+   "section_id": "s9",
+   "section": "4 Experiments > 4.2 ImageNet classification > 4.2.2 Single-Network Classification",
+   "quote": "with the initial learning rate 0.045",
+   "check": "quote_verbatim"
+  },
+  {
+   "field": "card.main_findings",
+   "kind": "block",
+   "page": 7,
+   "block_id": "p7-b12",
+   "paragraph_id": "para145",
+   "bbox": [
+    72.0,
+    565.63,
+    301.16,
+    681.32
+   ],
+   "section_id": "s9",
+   "section": "4 Experiments > 4.2 ImageNet classification > 4.2.2 Single-Network Classification",
+   "quote": "BN-x5 needs 14 times fewer steps than Inception to reach the 72.2% accuracy",
+   "check": "quote_verbatim"
+  },
+  {
+   "field": "card.main_findings",
+   "kind": "block",
+   "page": 7,
+   "block_id": "p7-b15",
+   "paragraph_id": "para147",
+   "bbox": [
+    328.21,
+    71.47,
+    533.46,
+    144.88
+   ],
+   "section_id": "s9",
+   "section": "4 Experiments > 4.2 ImageNet classification > 4.2.2 Single-Network Classification",
+   "quote": "BN-x30 2.7 · 106 74.8%",
+   "check": "quote_verbatim"
+  },
+  {
+   "field": "card.main_findings",
+   "kind": "block",
+   "page": 7,
+   "block_id": "p7-b15",
+   "paragraph_id": "para147",
+   "bbox": [
+    328.21,
+    71.47,
+    533.46,
+    144.88
+   ],
+   "section_id": "s9",
+   "section": "4 Experiments > 4.2 ImageNet classification > 4.2.2 Single-Network Classification",
+   "quote": "Inception 31.0 · 106 72.2%",
+   "check": "quote_verbatim"
+  },
+  {
+   "field": "card.main_findings",
+   "kind": "block",
+   "page": 7,
+   "block_id": "p7-b19",
+   "paragraph_id": "para148",
+   "bbox": [
+    311.04,
+    327.19,
+    540.3,
+    448.0
+   ],
+   "section_id": "s10",
+   "section": "4 Experiments > 4.2 ImageNet classification > 4.2.3 Ensemble Classification",
+   "quote": "Here we report a top-5 validation error of 4.9%, and test error of 4.82%",
+   "check": "quote_verbatim"
+  },
+  {
+   "field": "card.main_findings",
+   "kind": "block",
+   "page": 7,
+   "block_id": "p7-b19",
+   "paragraph_id": "para148",
+   "bbox": [
+    311.04,
+    327.19,
+    540.3,
+    448.0
+   ],
+   "section_id": "s10",
+   "section": "4 Experiments > 4.2 ImageNet classification > 4.2.3 Ensemble Classification",
+   "quote": "The latter reports the top-5 error of 4.94%",
+   "check": "quote_verbatim"
+  },
+  {
+   "field": "card.main_findings",
+   "kind": "block",
+   "page": 7,
+   "block_id": "p7-b17",
+   "paragraph_id": "para147",
+   "bbox": [
+    311.04,
+    231.31,
+    540.33,
+    292.36
+   ],
+   "section_id": "s9",
+   "section": "4 Experiments > 4.2 ImageNet classification > 4.2.2 Single-Network Classification",
+   "quote": "BN-x5-Sigmoid achieves the accuracy of 69.8%",
+   "check": "quote_verbatim"
+  },
+  {
+   "field": "card.conclusion",
+   "kind": "block",
+   "page": 8,
+   "block_id": "p8-b4",
+   "paragraph_id": "para153",
+   "bbox": [
+    72.0,
+    416.83,
+    301.35,
+    549.76
+   ],
+   "section_id": "s11",
+   "section": "5 Conclusion",
+   "quote": "Merely adding Batch Normalization to a state-of-theart image classification model yields a substantial speedup in training",
+   "check": "quote_verbatim"
+  },
+  {
+   "field": "card.limitations",
+   "kind": "block",
+   "page": 8,
+   "block_id": "p8-b7",
+   "paragraph_id": "para155",
+   "bbox": [
+    311.04,
+    292.39,
+    540.3,
+    485.08
+   ],
+   "section_id": "s11",
+   "section": "5 Conclusion",
+   "quote": "we have not explored the full range of possibilities that Batch Normalization potentially enables",
+   "check": "quote_verbatim"
+  },
+  {
+   "field": "card.limitations",
+   "kind": "block",
+   "page": 5,
+   "block_id": "p5-b21",
+   "paragraph_id": "para120",
+   "bbox": [
+    311.04,
+    225.19,
+    540.49,
+    441.64
+   ],
+   "section_id": "sx5",
+   "section": "3 Normalization via Mini-Batch Statistics > 3.3 Batch Normalization enables higher learning rates",
+   "quote": "We further conjecture that Batch Normalization may lead the layer Jacobians to have singular values close to 1",
+   "check": "quote_verbatim"
+  },
+  {
+   "field": "card.future_work",
+   "kind": "block",
+   "page": 8,
+   "block_id": "p8-b7",
+   "paragraph_id": "para155",
+   "bbox": [
+    311.04,
+    292.39,
+    540.3,
+    485.08
+   ],
+   "section_id": "s11",
+   "section": "5 Conclusion",
+   "quote": "Our future work includes applications of our method to Recurrent Neural Networks",
+   "check": "quote_verbatim"
+  },
+  {
+   "field": "sections.s1.purpose",
+   "kind": "block",
+   "page": 1,
+   "block_id": "p1-b5",
+   "paragraph_id": "para1",
+   "bbox": [
+    72.0,
+    193.39,
+    301.29,
+    457.72
+   ],
+   "section_id": "s1",
+   "section": "Abstract",
+   "quote": "We refer to this",
+   "check": "quote_verbatim"
+  },
+  {
+   "field": "sections.s2.purpose",
+   "kind": "block",
+   "page": 2,
+   "block_id": "p2-b5",
+   "paragraph_id": "para19",
+   "bbox": [
+    72.0,
+    381.79,
+    301.36,
+    610.24
+   ],
+   "section_id": "s2",
+   "section": "1 Introduction",
+   "quote": "We refer to the change in the distributions of internal nodes of a deep network, in the course of training, as Internal Covariate Shift",
+   "check": "quote_verbatim"
+  },
+  {
+   "field": "sections.s2.transition",
+   "kind": "block",
+   "page": 2,
+   "block_id": "p2-b6",
+   "paragraph_id": "para20",
+   "bbox": [
+    72.0,
+    625.87,
+    301.24,
+    722.8
+   ],
+   "section_id": "s2",
+   "section": "1 Introduction",
+   "quote": "show that we can match its performance using only 7% of the training steps",
+   "check": "quote_verbatim"
+  },
+  {
+   "field": "sections.sx1.method",
+   "kind": "block",
+   "page": 2,
+   "block_id": "p2-b10",
+   "paragraph_id": "para24",
+   "bbox": [
+    311.04,
+    451.23,
+    540.25,
+    612.4
+   ],
+   "section_id": "sx1",
+   "section": "2 Towards Reducing Internal Covariate Shift",
+   "quote": "As the training continues, b will grow",
+   "check": "quote_verbatim"
+  },
+  {
+   "field": "sections.sx1.conclusion",
+   "kind": "block",
+   "page": 3,
+   "block_id": "p3-b7",
+   "paragraph_id": "para29",
+   "bbox": [
+    72.0,
+    175.15,
+    301.28,
+    296.08
+   ],
+   "section_id": "sx1",
+   "section": "2 Towards Reducing Internal Covariate Shift",
+   "quote": "whitening the layer inputs is expensive",
+   "check": "quote_verbatim"
+  },
+  {
+   "field": "sections.sx2.method",
+   "kind": "block",
+   "page": 3,
+   "block_id": "p3-b10",
+   "paragraph_id": "para32",
+   "bbox": [
+    72.0,
+    463.99,
+    301.16,
+    561.04
+   ],
+   "section_id": "sx2",
+   "section": "3 Normalization via Mini-Batch Statistics",
+   "quote": "we make two necessary simplifications",
+   "check": "quote_verbatim"
+  },
+  {
+   "field": "sections.sx3.method",
+   "kind": "block",
+   "page": 4,
+   "block_id": "p4-b51",
+   "paragraph_id": "para75",
+   "bbox": [
+    311.04,
+    197.35,
+    540.21,
+    294.28
+   ],
+   "section_id": "sx3",
+   "section": "3 Normalization via Mini-Batch Statistics > 3.1 Training and Inference with Batch-Normalized Networks",
+   "quote": "the normalization is simply a linear transform applied to each activation",
+   "check": "quote_verbatim"
+  },
+  {
+   "field": "sections.sx4.method",
+   "kind": "block",
+   "page": 5,
+   "block_id": "p5-b7",
+   "paragraph_id": "para113",
+   "bbox": [
+    72.0,
+    361.51,
+    301.33,
+    530.2
+   ],
+   "section_id": "sx4",
+   "section": "3 Normalization via Mini-Batch Statistics > 3.2 Batch-Normalized Convolutional Networks",
+   "quote": "so that different elements of the same feature map, at different locations, are normalized in the same way",
+   "check": "quote_verbatim"
+  },
+  {
+   "field": "sections.sx5.results",
+   "kind": "block",
+   "page": 5,
+   "block_id": "p5-b11",
+   "paragraph_id": "para116",
+   "bbox": [
+    311.04,
+    35.47,
+    540.2,
+    84.64
+   ],
+   "section_id": "sx5",
+   "section": "3 Normalization via Mini-Batch Statistics > 3.3 Batch Normalization enables higher learning rates",
+   "quote": "backpropagation through a layer is unaffected by the scale of its parameters",
+   "check": "quote_verbatim"
+  },
+  {
+   "field": "sections.sx6.conclusion",
+   "kind": "block",
+   "page": 5,
+   "block_id": "p5-b23",
+   "paragraph_id": "para122",
+   "bbox": [
+    311.04,
+    489.55,
+    540.4,
+    598.48
+   ],
+   "section_id": "sx6",
+   "section": "3 Normalization via Mini-Batch Statistics > 3.4 Batch Normalization regularizes the model",
+   "quote": "we found this effect to be advantageous to the generalization of the network",
+   "check": "quote_verbatim"
+  },
+  {
+   "field": "sections.s6.results",
+   "kind": "block",
+   "page": 6,
+   "block_id": "p6-b4",
+   "paragraph_id": "para125",
+   "bbox": [
+    72.0,
+    369.07,
+    301.36,
+    442.12
+   ],
+   "section_id": "s6",
+   "section": "4 Experiments > 4.1 Activations over time",
+   "quote": "The batch-normalized network enjoys the higher test accuracy",
+   "check": "quote_verbatim"
+  },
+  {
+   "field": "sections.s7.method",
+   "kind": "block",
+   "page": 6,
+   "block_id": "p6-b8",
+   "paragraph_id": "para127",
+   "bbox": [
+    311.04,
+    35.47,
+    540.2,
+    156.4
+   ],
+   "section_id": "s7",
+   "section": "4 Experiments > 4.2 ImageNet classification",
+   "quote": "using the mini-batch size of 32",
+   "check": "quote_verbatim"
+  },
+  {
+   "field": "sections.s8.method",
+   "kind": "block",
+   "page": 6,
+   "block_id": "p6-b14",
+   "paragraph_id": "para132",
+   "bbox": [
+    311.04,
+    402.55,
+    540.2,
+    463.72
+   ],
+   "section_id": "s8",
+   "section": "4 Experiments > 4.2 ImageNet classification > 4.2.1 Accelerating BN Networks",
+   "quote": "the weight of this loss is reduced by a factor of 5",
+   "check": "quote_verbatim"
+  },
+  {
+   "field": "sections.s8.method",
+   "kind": "block",
+   "page": 6,
+   "block_id": "p6-b15",
+   "paragraph_id": "para133",
+   "bbox": [
+    311.04,
+    464.35,
+    540.2,
+    513.52
+   ],
+   "section_id": "s8",
+   "section": "4 Experiments > 4.2 ImageNet classification > 4.2.1 Accelerating BN Networks",
+   "quote": "we lower the learning rate 6 times faster",
+   "check": "quote_verbatim"
+  },
+  {
+   "field": "sections.s9.results",
+   "kind": "block",
+   "page": 7,
+   "block_id": "p7-b12",
+   "paragraph_id": "para145",
+   "bbox": [
+    72.0,
+    565.63,
+    301.16,
+    681.32
+   ],
+   "section_id": "s9",
+   "section": "4 Experiments > 4.2 ImageNet classification > 4.2.2 Single-Network Classification",
+   "quote": "we match the accuracy of Inception in less than half the number of training steps",
+   "check": "quote_verbatim"
+  },
+  {
+   "field": "sections.s10.results",
+   "kind": "block",
+   "page": 7,
+   "block_id": "p7-b20",
+   "paragraph_id": "para149",
+   "bbox": [
+    311.04,
+    447.07,
+    540.57,
+    591.88
+   ],
+   "section_id": "s10",
+   "section": "4 Experiments > 4.2 ImageNet classification > 4.2.3 Ensemble Classification",
+   "quote": "For our ensemble, we used 6 networks",
+   "check": "quote_verbatim"
+  },
+  {
+   "field": "sections.s10.results",
+   "kind": "block",
+   "page": 7,
+   "block_id": "p7-b19",
+   "paragraph_id": "para148",
+   "bbox": [
+    311.04,
+    327.19,
+    540.3,
+    448.0
+   ],
+   "section_id": "s10",
+   "section": "4 Experiments > 4.2 ImageNet classification > 4.2.3 Ensemble Classification",
+   "quote": "test error of 4.82%",
+   "check": "quote_verbatim"
+  },
+  {
+   "field": "sections.s11.conclusion",
+   "kind": "block",
+   "page": 8,
+   "block_id": "p8-b3",
+   "paragraph_id": "para152",
+   "bbox": [
+    72.0,
+    196.03,
+    301.28,
+    412.48
+   ],
+   "section_id": "s11",
+   "section": "5 Conclusion",
+   "quote": "incorporating this normalization in the network architecture itself",
+   "check": "quote_verbatim"
+  },
+  {
+   "field": "knowledge[0]:Internal Covariate Shift",
+   "kind": "block",
+   "page": 2,
+   "block_id": "p2-b8",
+   "paragraph_id": "para22",
+   "bbox": [
+    311.04,
+    80.95,
+    540.21,
+    273.64
+   ],
+   "section_id": "sx1",
+   "section": "2 Towards Reducing Internal Covariate Shift",
+   "quote": "We define Internal Covariate Shift as the change in the distribution of network activations due to the change in network parameters during training",
+   "check": "quote_verbatim"
+  },
+  {
+   "field": "knowledge[1]:BN",
+   "kind": "block",
+   "page": 3,
+   "block_id": "p3-b23",
+   "paragraph_id": "para41",
+   "bbox": [
+    311.04,
+    448.51,
+    540.13,
+    485.68
+   ],
+   "section_id": "sx2",
+   "section": "3 Normalization via Mini-Batch Statistics",
+   "quote": "as the Batch Normalizing Transform",
+   "check": "quote_verbatim"
+  },
+  {
+   "field": "knowledge[1]:BN",
+   "kind": "block",
+   "page": 3,
+   "block_id": "p3-b44",
+   "paragraph_id": "para52",
+   "bbox": [
+    311.04,
+    697.51,
+    540.2,
+    723.18
+   ],
+   "section_id": "sx2",
+   "section": "3 Normalization via Mini-Batch Statistics",
+   "quote": "In the notation y = BNγ,β(x)",
+   "check": "quote_verbatim"
+  },
+  {
+   "field": "knowledge[2]:γ, β",
+   "kind": "block",
+   "page": 3,
+   "block_id": "p3-b14",
+   "paragraph_id": "para34",
+   "bbox": [
+    311.04,
+    35.47,
+    540.28,
+    60.76
+   ],
+   "section_id": "sx2",
+   "section": "3 Normalization via Mini-Batch Statistics",
+   "quote": "a pair of parameters γ(k), β(k), which scale and shift the normalized value",
+   "check": "quote_verbatim"
+  }
+ ],
+ "unreported": [
+  {
+   "field": "card.contributions",
+   "reason": "no explicit contribution list"
+  },
+  {
+   "field": "card.venue_year",
+   "reason": "venue not printed in the text layer"
+  }
+ ],
+ "uncertainty": [],
+ "conflicts": [],
+ "verification": {
+  "n_items": 37,
+  "n_verified": 37,
+  "n_needs_review": 0,
+  "n_failed": 0,
+  "section_coverage": {
+   "required": 7,
+   "covered": 7,
+   "missing": []
+  },
+  "unknown_section_ids_in_draft": [],
+  "card_missing": [],
+  "knowledge_merges": [
+   {
+    "merged": "batch normalization",
+    "into": "BN"
+   }
+  ],
+  "outline_fixes": [
+   {
+    "section": "s3",
+    "fix": "rejected junk heading '1 N' (merged into previous section)"
+   },
+   {
+    "section": "s4",
+    "fix": "rejected junk heading '1 N' (merged into previous section)"
+   },
+   {
+    "section": "sx1",
+    "fix": "recovered heading '2 Towards Reducing Internal Covariate Shift' at p2-b7"
+   },
+   {
+    "section": "sx2",
+    "fix": "recovered heading '3 Normalization via Mini-Batch Statistics' at p3-b9"
+   },
+   {
+    "section": "sx3",
+    "fix": "recovered heading '3.1 Training and Inference with Batch- Normalized Networks' at p4-b44"
+   },
+   {
+    "section": "sx4",
+    "fix": "recovered heading '3.2 Batch-Normalized Convolutional Networks' at p4-b96"
+   },
+   {
+    "section": "sx5",
+    "fix": "recovered heading '3.3 Batch Normalization enables higher learning rates' at p5-b8"
+   },
+   {
+    "section": "sx6",
+    "fix": "recovered heading '3.4 Batch Normalization regularizes the model' at p5-b22"
+   }
+  ],
+  "failed_items": [],
+  "review_items": [],
+  "machine_checkable": [
+   "anchor exists",
+   "quote verbatim in cited block (or relocated)",
+   "anchor page/section",
+   "numbers in note appear in anchored text",
+   "section coverage/order",
+   "card fields present",
+   "duplicate knowledge points merged",
+   "abbreviation expansion printed"
+  ],
+  "human_review": [
+   "note is a faithful paraphrase of its quote",
+   "figure/page-image readings",
+   "fuzzy quotes",
+   "completeness of limitations/conditions"
+  ]
+ },
+ "sources": [
+  {
+   "file": "<tmp>\\notes_dev\\rob\\1502.03167\\input\\paper.pdf",
+   "sha256": "bdc69e0b568f41d8d3181cc9077a461f58fcdd1c70c9f49efe60a05ee6109655",
+   "parsed_dir": "<tmp>/notes_dev/rob/1502.03167/output\\parsed\\paper",
+   "parse_status": "success",
+   "parse_error": null,
+   "page_count": 11,
+   "pages_parsed": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11
+   ],
+   "pages_not_parsed": [],
+   "unresolved_pages": [],
+   "ocr_pages": [],
+   "warnings": [
+    {
+     "code": "section_number_gap",
+     "detail": "top-level section 1 followed by 4; a heading may be missed"
+    }
+   ]
+  }
+ ],
+ "outputs": {
+  "notes_md": "notes.md",
+  "paper_card_json": "paper_card.json",
+  "paper_card_csv": "paper_card.csv",
+  "knowledge_jsonl": "knowledge_points.jsonl",
+  "verification": "verification.json"
+ },
+ "change_log": [
+  {
+   "at": "2026-11-22T09:44:31Z",
+   "step": "init",
+   "detail": "parsed 1 PDF(s)"
+  },
+  {
+   "at": "2026-11-22T09:44:32Z",
+   "step": "build",
+   "detail": "37 items: 37 verified, 0 review, 0 failed"
+  }
+ ]
+}
