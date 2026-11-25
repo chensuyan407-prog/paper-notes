@@ -26,6 +26,55 @@ PASS  output_knowledge_points.jsonl            expected=True           actual=Tr
 PASS  output_verification.json                 expected=True           actual=True           
 PASS  encrypted_status_failed                  expected=failed         actual=failed         paper.pdf: encrypted
 PASS  scanned_pseudo_section                   expected=True           actual=True           s1 L1  [page 1, image-only page, read the page image] pp1-1
+PASS  md_primary_selected_by_role              expected=paper.md       actual=paper.md       
+PASS  md_supplement_parsed_as_S1               expected=True           actual=True           
+PASS  md_outline                               expected=['1 Introduction', '2 Method', '3 Results', 'Limitations', 'References'] actual=['1 Introduction', '2 Method', '3 Results', 'Limitations', 'References'] 
+PASS  md_abstract_section                      expected=True           actual=True           s1 L1  Abstract pp1-1
+PASS  env_sh_written                           expected=True           actual=True           
+PASS  cue_limitation_strong_first              expected=True           actual=True           p1-b15: A limitation of this study is the small sample of En
+PASS  cue_table_row_ours                       expected=True           actual=True           
+PASS  cue_conditions_epochs                    expected=True           actual=True           
+PASS  merge_rejects_unknown_section            expected=['s99']        actual=['s99']        
+PASS  dry_run_writes_nothing                   expected=True           actual=True           
+PASS  line_anchor_verified                     expected=verified       actual=verified       
+PASS  line_anchor_has_lines                    expected=True           actual=True           
+PASS  num_equiv_60yi_6billion                  expected=verified       actual=verified       {"status": "verified", "number_equivalence": ["60 == 6e+09 (scale/percent equivalence)"]}
+PASS  num_equiv_wrong_scale_fails              expected=failed         actual=failed         
+PASS  num_equiv_percent_decimal                expected=verified       actual=verified       
+PASS  num_cjk_context_checked                  expected=failed         actual=failed         
+PASS  num_equiv_128wan                         expected=verified       actual=verified       
+PASS  supplement_anchor_verified               expected=['verified', 'S1'] actual=['verified', 'S1'] 
+PASS  supplement_unknown_source_fails          expected=failed         actual=failed         
+PASS  kp_abbr_merged_with_long_form            expected=True           actual=True           
+PASS  kp_abbr_collision_not_merged             expected=2              actual=2              
+PASS  kp_collision_reported                    expected=True           actual=True           
+PASS  kp_definition_conflict_numbers           expected=True           actual=True           
+PASS  case_id_zero_kept                        expected=0              actual=0              
+PASS  case_id_contract_not_unreported          expected=False          actual=False          
+PASS  contract_limitations_auto                expected=True           actual=True           
+PASS  sections_by_number_and_title             expected=True           actual=True           
+PASS  broken_draft_exit_4                      expected=4              actual=4              
+PASS  broken_draft_result_untouched            expected=8679144bab309fa53f1d496ecacb86f03446b21882ba69fb9e3430374163d88c actual=8679144bab309fa53f1d496ecacb86f03446b21882ba69fb9e3430374163d88c 
+PASS  broken_draft_error_file                  expected=True           actual=True           
+PASS  lenient_draft_repaired                   expected=True           actual=True           ['removed ``` code fence', 'removed trailing commas']
+PASS  regression_warning                       expected=True           actual=True           
+PASS  txt_cn_outline                           expected=['一、 引言', '（一） 研究背景', '二、 研究方法', '1.1 数据集', '三、 结果', '局限性'] actual=['一、 引言', '（一） 研究背景', '二、 研究方法', '1.1 数据集', '三、 结果', '局限性'] 
+PASS  txt_cn_levels                            expected=['L1', 'L2', 'L1', 'L2', 'L1', 'L1'] actual=['L1', 'L2', 'L1', 'L2', 'L1', 'L1'] 
+PASS  txt_formfeed_page2                       expected=True           actual=True           p2-b2
+PASS  txt_cn_quote_verified                    expected=verified       actual=verified       
+PASS  docx_outline                             expected=['Introduction', 'Method', 'Training Setup', 'Results'] actual=['Introduction', 'Method', 'Training Setup', 'Results'] 
+PASS  docx_table_row                           expected=quote_in_table actual=quote_in_table 
+PASS  docx_page_break                          expected=True           actual=True           
+PASS  docx_title                               expected=Notes on Word Papers actual=Notes on Word Papers 
+PASS  table_none_cells_no_crash                expected=quote_in_table actual=quote_in_table 
+PASS  toc_line_not_heading                     expected=[None, None, 'appendix'] actual=[None, None, 'appendix'] 
+PASS  filename_supplement_not_primary          expected=main.pdf       actual=main.pdf       
+PASS  pdf_recovered_unnumbered_headings        expected=['L1 1 Introduction', 'L1 2 Experiments', 'L2 EXPERIMENTAL SETUP', 'L1 3 Discussion', 'L2 Limitations'] actual=['L1 1 Introduction', 'L1 2 Experiments', 'L2 EXPERIMENTAL SETUP', 'L1 3 Discussion', 'L2 Limitations'] 
+PASS  pdf_limitations_section_of_interest      expected=True           actual=True           
+PASS  mixed_page_flagged                       expected=True           actual=True           ['p3: large image covers 43% of the page, text layer only 126 chars']
+PASS  mixed_page_in_digest                     expected=True           actual=True           
+PASS  mixed_page_unread_uncertainty            expected=True           actual=True           
+PASS  mixed_page_read_after_image_anchor       expected=[True, 'needs_review'] actual=[True, 'needs_review'] 
 
-28/28 passed; work dir C:\Users\12117\AppData\Local\Temp\paper_notes_test_4kdcaep1
+77/77 passed; work dir C:\Users\12117\AppData\Local\Temp\paper_notes_test_tz4vhae0
 

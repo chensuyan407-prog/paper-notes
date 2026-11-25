@@ -18,7 +18,7 @@ import os
 import re
 import unicodedata
 
-VERSION = "paper-notes 1.0.0"
+VERSION = "paper-notes 1.1.0"
 
 # Unified paper-card fields (same keys for every paper, so cards can be compared side by side).
 CARD_FIELDS = [
@@ -56,6 +56,35 @@ CUES = {
     "future_work": r"\b(future (work|research|direction)|we (plan|leave|hope)|left for future|open (question|problem))\b|未来|今后|后续工作",
 }
 CUE_RE = {k: re.compile(v, re.I) for k, v in CUES.items()}
+# author-voice phrases that almost always mark the field (weighted above the generic CUES words)
+CUE_STRONG = {
+    "limitations": r"\b(a |one |the |main |key |major |several |some |important )?(limitations?|shortcomings?|caveats?|weakness(es)?) "
+                   r"(of|to|in) (this|our|the present|these|the proposed)|\bour (study|work|approach|method|analysis|model|results?) "
+                   r"(is|are|has|have|was|were) (limited|restricted|constrained)|\b(is|are|was|were) limited (to|by)|"
+                   r"(should|must) be interpreted with caution|may not generali[sz]e|generali[sz]ability|"
+                   r"\bwe (did|do) not (evaluate|consider|test|address|examine|study|account|include|investigate)|"
+                   r"\b(small|limited) (sample|dataset|number of)|"
+                   r"\bfuture (work|studies|research) (should|could|is needed|will need)|remains? to be (seen|tested|explored)|"
+                   r"局限|不足之处|存在(一定的?)?(不足|局限|缺陷)|有待(进一步)?|尚未(考虑|验证|涉及)|仅(限于|适用于)|样本量(较小|有限)",
+    "conditions": r"\b(trained|fine-?tuned|optimi[sz]ed|run|evaluated|tested|measured|incubated|recruited|sampled) "
+                  r"(for|with|on|at|under|using) [^.]{0,40}\d|\b(learning rate|batch size|epochs?|temperature|dropout|seed|"
+                  r"weight decay|warm-?up|optimizer|momentum)\b[^.]{0,30}\d|\b(we|was|were) (set|fixed|held|kept) [^.]{0,40}(to|at|constant)|"
+                  r"\b(assum(e|es|ed|ing|ption)s?|provided that|only (when|if|for)|under the (assumption|condition|setting))\b|"
+                  r"\b(inclusion|exclusion) criteria|\bp\s*[<=]\s*0?\.\d|\bn\s*=\s*\d|in (vitro|vivo)|"
+                  r"假设|前提|条件下|设置为|设定为|取值为|实验(环境|设置|条件)|样本量|纳入标准|排除标准",
+    "data": r"\b(we (use|used|collect|collected|construct|constructed|curate|curated)|consist(s|ed|ing)? of|compris(es|ed|ing)|contain(s|ed|ing)?) "
+            r"[^.]{0,60}\d[\d,.]*\s*(k|m|million|thousand)?\s*(images|samples|patients|participants|sentences|documents|tokens|pairs|records|examples|subjects)|"
+            r"(共|总计|包含|收集了?)[^。]{0,20}\d+[^。]{0,6}(例|名|个|条|篇|张|组|份)",
+    "main_findings": r"\b(outperforms?|surpass(es)?|improves? [^.]{0,40}by|achiev(es|ed) (a |an )?(new )?(state-of-the-art|best|top)|"
+                     r"significantly (better|higher|lower|reduc|improv)|(results|experiments) (show|demonstrate|indicate) that)\b|"
+                     r"(显著|明显)(提高|提升|降低|优于)|结果表明|实验表明",
+}
+CUE_STRONG_RE = {k: re.compile(v, re.I) for k, v in CUE_STRONG.items()}
+CUE_OWN_SECTION = {"limitations": r"limitation|threats to validity|局限|不足", "conditions": r"setup|setting|implementation|"
+                   r"hyper|training details|protocol|设置|实验环境", "data": r"data|dataset|corpus|material|sample|数据|材料|样本",
+                   "future_work": r"future|outlook|展望"}
+CUE_WEAK_LIMIT = re.compile(r"\b(does not|do not|cannot)\b", re.I)
+UNIT_RE = r"\d\s*(%|°C|K\b|ms\b|s\b|h\b|epochs?|steps?|GPUs?|layers?|heads?|mg|ml|mM|nm|μm|Hz|GB|M\b|B\b)"
 SECTION_HINT = {
     "research_question": r"abstract|introduction|引言|摘要|背景",
     "contributions": r"introduction|引言",
@@ -68,10 +97,11 @@ SECTION_HINT = {
     "future_work": r"conclusion|discussion|future|结论|展望",
 }
 
-NUM_RE = re.compile(r"(?<![\w.\-−–])[-−–]?\d+(?:,\d{3})*(?:\.\d+)?(?:\s?%)?")
+NUM_RE = re.compile(r"(?<![A-Za-z0-9_.\-−–])[-−–]?\d+(?:,\d{3})*(?:\.\d+)?(?:\s?%)?")
 SENT_SPLIT = re.compile(r"(?<=[.!?。！？；;])\s+(?=[A-Z0-9\"“(\[])|(?<=[。！？；])")
 ANCHOR_RE = re.compile(
     r"^\s*(?:(?P<block>p\d+-[bmg]\d+)|(?P<para>para\d+)|(?P<sec>s\d+)"
+    r"|(?P<line>(?:L|line\s*)(?P<lnum>\d+)(?:\s*-\s*L?(?P<lnum2>\d+))?)"
     r"|(?P<img>p(?P<ipage>\d+)@(?P<bbox>[\d.\s,]+))"
     r"|(?P<tab>(?:table|tab\.?|表)\s*(?P<tabn>[A-Z]?\d+[a-z]?))"
     r"|(?P<fig>(?:figure|fig\.?|图)\s*(?P<fign>[A-Z]?\d+[a-z]?))"
@@ -125,6 +155,173 @@ def note_numbers(s):
     return res
 
 
+# ---------------------------------------------------------------- quantity equivalence
+# "60 亿" == "6 billion" == "6,000,000,000"; "128 万" == "1.28 million"; "95%" == "0.95"; "3.2k" == "3200".
+SCALE_WORDS = {"thousand": 1e3, "million": 1e6, "billion": 1e9, "trillion": 1e12, "bn": 1e9, "mn": 1e6,
+               "千": 1e3, "万": 1e4, "十万": 1e5, "百万": 1e6, "千万": 1e7, "亿": 1e8, "十亿": 1e9, "百亿": 1e10,
+               "千亿": 1e11, "万亿": 1e12}
+SCALE_LETTER = {"k": 1e3, "K": 1e3, "M": 1e6, "B": 1e9, "T": 1e12}
+_SUP = str.maketrans("⁰¹²³⁴⁵⁶⁷⁸⁹⁻", "0123456789-")
+QTY_RE = re.compile(
+    r"(?<![A-Za-z0-9_.])(?P<num>[-−–]?\d+(?:,\d{3})*(?:\.\d+)?)"
+    r"(?:\s*[x×*·]\s*10\s*\^\s*(?P<exp>[-−]?\d+)|[eE](?P<exp2>[-+]?\d+)(?![A-Za-z]))?"
+    r"(?:\s*(?P<pct>%|％|percent\b|per cent\b)|\s*(?P<cn>万亿|千亿|百亿|十亿|亿|千万|百万|十万|万|千)"
+    r"|\s*(?P<word>thousand|million|billion|trillion|bn|mn)\b|(?P<let>[kKMBT])(?![A-Za-z]))?")
+PVALUE_CTX = re.compile(r"(?:\bp|α|alpha)\s*[<=≤>]\s*$", re.I)
+
+
+def _canon(v):
+    return float(f"{v:.6g}")
+
+
+def quantity_values(text, only=None):
+    """[(number_string, {equivalent canonical values})] for every number in text, scale words applied.
+    `only` restricts to occurrences whose bare number (commas removed) equals it."""
+    s = re.sub(r"[⁰¹²³⁴⁵⁶⁷⁸⁹⁻]+", lambda m: "^" + m.group().translate(_SUP), text or "")
+    s = nfkc(s)
+    out = []
+    for m in QTY_RE.finditer(s):
+        raw = m.group("num").replace("−", "-").replace("–", "-")
+        bare = raw.replace(",", "")
+        if only is not None and bare.lstrip("-") != str(only).replace(",", "").lstrip("-"):
+            continue
+        try:
+            base = float(bare)
+        except ValueError:
+            continue
+        exp = m.group("exp") or m.group("exp2")
+        if exp:
+            try:
+                base = base * 10 ** int(exp.replace("−", "-"))
+            except (ValueError, OverflowError):
+                continue
+        vals = set()
+        if m.group("pct"):
+            vals |= {_canon(base), _canon(base / 100)}
+        elif m.group("cn"):
+            vals.add(_canon(base * SCALE_WORDS[m.group("cn")]))
+        elif m.group("word"):
+            vals.add(_canon(base * SCALE_WORDS[m.group("word").lower()]))
+        elif m.group("let"):
+            vals |= {_canon(base * SCALE_LETTER[m.group("let")]), _canon(base)}
+        else:
+            vals.add(_canon(base))
+            if 0 < abs(base) <= 1 and "." in bare and not PVALUE_CTX.search(s[:m.start()]):
+                vals.add(_canon(base * 100))  # 0.95 can be quoted as 95%
+        out.append((bare, vals))
+    return out
+
+
+def quantity_set(text):
+    acc = set()
+    for _, v in quantity_values(text):
+        acc |= v
+    return acc
+
+
+def equivalent_number(n, note_text, evidence_quantities):
+    """If note number n (with its scale word / percent sign in the note) equals a quantity printed in the
+    evidence in another unit or notation, return a short explanation, else None."""
+    for bare, vals in quantity_values(note_text, only=n):
+        hit = vals & evidence_quantities
+        if hit:
+            return f"{n} == {sorted(hit)[0]:g} (scale/percent equivalence)"
+    return None
+
+
+# ---------------------------------------------------------------- heading classification (text inputs + repair)
+CN_DIGITS = {"零": 0, "〇": 0, "一": 1, "二": 2, "两": 2, "三": 3, "四": 4, "五": 5, "六": 6, "七": 7, "八": 8, "九": 9}
+
+
+def cn2int(s):
+    s = (s or "").strip()
+    if s.isdigit():
+        return int(s)
+    if not s or any(c not in CN_DIGITS and c not in "十百" for c in s):
+        return None
+    total, cur = 0, 0
+    for c in s:
+        if c == "百":
+            total += (cur or 1) * 100
+            cur = 0
+        elif c == "十":
+            total += (cur or 1) * 10
+            cur = 0
+        else:
+            cur = CN_DIGITS[c]
+    return total + cur
+
+
+NAMED_SECTION = re.compile(
+    r"^\s*(abstract|summary|introduction|background|related work|prior work|preliminar(y|ies)|problem (statement|formulation|setup)|"
+    r"methods?|methodology|materials and methods|materials|approach|proposed method|model|framework|"
+    r"experiments?|experimental (setup|section|details|design|results)|setup|implementation( details)?|datasets?|data|"
+    r"evaluation|results?( and discussion)?|findings|analysis|ablation (study|studies)|case stud(y|ies)|discussion|"
+    r"general discussion|limitations?( and future (work|directions))?|threats to validity|broader impacts?|"
+    r"conclusions?( and future work)?|concluding remarks|future work|summary and outlook|outlook|"
+    r"acknowledge?ments?|references|bibliography|appendix( [a-z0-9]+)?|appendices|supplementary (information|materials?|methods)|"
+    r"supporting information|data availability|code availability|ethics( statement)?|author contributions|"
+    r"competing interests|conflicts? of interest|funding|"
+    r"摘\s*要|关键词|引\s*言|前\s*言|绪\s*论|背\s*景|研究背景|相关工作|文献综述|研究方法|方\s*法|材料与方法|数据与方法|"
+    r"实\s*验|实验设置|实验结果|结\s*果|讨\s*论|结果与讨论|结果与分析|分\s*析|局限性?|研究局限|不足与展望|局限与展望|"
+    r"结\s*论|结\s*语|总结与展望|总\s*结|展\s*望|致\s*谢|参考文献|附\s*录)\s*[:：.]?\s*$", re.I)
+END_MATTER = re.compile(r"^\s*(acknowledg|references|bibliography|appendi|supplementary|supporting|data availability|"
+                        r"code availability|ethics|author contributions|competing|conflicts? of|funding|致谢|参考文献|附录)", re.I)
+_CN_N = "一二三四五六七八九十百零〇两"
+CN_UNIT_START = set("倍个种项次年月日号万亿千百名例组篇位元度米克份层类条张台天周岁秒分时人家所")
+
+
+def classify_heading(text):
+    """Heading-like line -> {'kind', 'number', 'title', 'level', 'num_key'} or None.
+    Kinds: cn_chapter (第N章), cn_section (第N节), cn1 (一、), cn2 (（一）), numeric (1 / 1.1 / 1.1数据), roman (II.),
+    appendix (Appendix A / 附录A), named (Abstract, Limitations, 摘要 ...), caps (EXPERIMENTAL SETUP)."""
+    t = re.sub(r"\s+", " ", nfkc(text or "")).strip()
+    t = t.lstrip("#").strip() if t.startswith("#") else t
+    if not t or len(t) > 120:
+        return None
+    if re.search(r"(\.\s*){3,}\s*\d+$|…+\s*\d+$", t) or re.match(r"^(appendices|contents|目\s*录)\b.*\d+$", t, re.I):
+        return None  # table-of-contents line ('Appendices 20', '3 Results ...... 12')
+    m = re.match(r"^第\s*([\d" + _CN_N + r"]+)\s*([章节篇部])\s*(.{0,60})$", t)
+    if m and cn2int(m.group(1)) is not None:
+        n = cn2int(m.group(1))
+        lvl = 2 if m.group(2) == "节" else 1
+        return {"kind": "cn_section" if lvl == 2 else "cn_chapter", "number": f"第{m.group(1)}{m.group(2)}",
+                "title": m.group(3).strip() or t, "level": lvl, "num_key": (n,)}
+    m = re.match(r"^([" + _CN_N + r"]+)\s*[、．]\s*(\S.{0,58})$", t)
+    if m and cn2int(m.group(1)) is not None and not re.search(r"[。；;，,]$", t):
+        return {"kind": "cn1", "number": m.group(1) + "、", "title": m.group(2).strip(), "level": 1,
+                "num_key": (cn2int(m.group(1)),)}
+    m = re.match(r"^[（(]\s*([" + _CN_N + r"]+)\s*[）)]\s*(\S.{0,58})$", t)
+    if m and cn2int(m.group(1)) is not None and not re.search(r"[。；;，,]$", t):
+        return {"kind": "cn2", "number": f"（{m.group(1)}）", "title": m.group(2).strip(), "level": 2,
+                "num_key": (cn2int(m.group(1)),)}
+    m = re.match(r"^(\d+(?:\.\d+){0,3})\.?\s+(\S.{0,110})$", t) or re.match(r"^(\d+(?:\.\d+){1,3})\s*([一-鿿][^\s。，,;；]{0,24})$", t)
+    if m:
+        num, title = m.group(1), m.group(2).strip()
+        first = title[0]
+        if (first.isupper() or "一" <= first <= "鿿") and not re.search(r"[.。;；,，:：]$", title) \
+                and len(title.split()) <= 14 and not re.match(r"^\d", title) and title[0] not in CN_UNIT_START:
+            tu = tuple(int(x) for x in num.split("."))
+            if tu[0] < 100:
+                return {"kind": "numeric", "number": num, "title": title, "level": len(tu), "num_key": tu}
+    m = re.match(r"^((?:X{0,3})(?:IX|IV|V?I{0,3}))\.\s+([A-Z].{0,110})$", t)
+    if m and m.group(1):
+        return {"kind": "roman", "number": m.group(1), "title": m.group(2).strip(), "level": 1, "num_key": None}
+    m = re.match(r"^(appendix|appendices|附\s*录)\s*([A-Z]|\d+|[" + _CN_N + r"]+)?\s*[.:：]?\s*(.{0,100})$", t, re.I)
+    if m and (not m.group(3) or ((m.group(3)[:1].isupper() or "一" <= m.group(3)[:1] <= "鿿")
+                                 and len(m.group(3).split()) <= 12 and not re.search(r"[.。;；,，]$", m.group(3)))):
+        return {"kind": "appendix", "number": m.group(2), "title": (m.group(3) or m.group(1)).strip(), "level": 1,
+                "num_key": None, "appendix": True}
+    if NAMED_SECTION.match(t):
+        return {"kind": "named", "number": None, "title": t.rstrip(":：. "), "level": 1, "num_key": None}
+    letters = re.sub(r"[^A-Za-z]", "", t)
+    words = t.split()
+    if (len(letters) >= 4 and t.upper() == t and letters.isupper() and 1 <= len(words) <= 8
+            and not re.search(r"[.;,:]$", t) and not re.search(r"\d{3,}", t)):
+        return {"kind": "caps", "number": None, "title": t, "level": 1, "num_key": None}
+    return None
+
+
 def split_sentences(text):
     parts = [p.strip() for p in SENT_SPLIT.split(text or "") if p and p.strip()]
     return parts or ([text.strip()] if text and text.strip() else [])
@@ -160,10 +357,23 @@ class Doc:
             for s in p.get("sources", []):
                 self.block_para[s["block_id"]] = p["id"]
         self.tables = {}
+        self.table_chains = {}
+        by_tid = {}
         for t in d.get("tables", []):
+            if t.get("id"):
+                by_tid[t["id"]] = t
             n = label_num(t.get("caption"), "table")
-            if n and n not in self.tables:
-                self.tables[n] = t
+            if n:
+                self.tables.setdefault(n, t)
+                self.table_chains.setdefault(n, []).append(t)
+        for t in d.get("tables", []):
+            cf = t.get("continued_from")
+            while cf and cf in by_tid:
+                root = by_tid[cf]
+                rn = label_num(root.get("caption"), "table")
+                if rn and t not in self.table_chains.get(rn, []):
+                    self.table_chains.setdefault(rn, []).append(t)
+                cf = root.get("continued_from")
         self.figures = {}
         for f in d.get("figures", []):
             n = label_num(f.get("caption"), "figure")
@@ -254,7 +464,8 @@ class Doc:
             try:
                 return tuple(int(x) for x in str(n).split("."))
             except ValueError:
-                return None
+                c = cn2int(re.sub(r"[第章节篇部、（）()\s]", "", str(n)))  # 一、 / 第三章 / （二）
+                return (c,) if c is not None and not str(n).startswith(("（", "(")) else None
         keep = []
         for s in raw:
             t = (s.get("title") or "").strip()
@@ -278,6 +489,15 @@ class Doc:
             txt = (b.get("text") or "").strip()
             m = hrx.match(txt)
             if not m or len(txt.split()) > 16 or txt.endswith((".", ",", ";", ":")):
+                hc = self._unnumbered_heading(b, txt, med, raw)
+                if hc and txt.lower() not in {(x.get("title") or "").lower() for x in raw + added}:
+                    new = {"id": f"sx{len(added) + 1}", "level": hc["level"], "number": hc.get("number"),
+                           "title": hc["title"], "page": b["page"], "block_id": bid, "parent": None,
+                           "rule": f"recovered: {hc['kind']} heading line", "skip": bool(SKIP_SECTION.match(hc["title"])),
+                           "appendix": bool(hc.get("appendix") or APPENDIX_RE.match(hc["title"])), "_kind": hc["kind"]}
+                    added.append(new)
+                    b["role"] = "heading"
+                    fixes.append({"section": new["id"], "fix": f"recovered {hc['kind']} heading '{txt[:60]}' at {bid}"})
                 continue
             if not (b.get("bold") or (b.get("size") or 0) > med + 0.5):
                 continue
@@ -307,6 +527,21 @@ class Doc:
             b["role"] = "heading"
             fixes.append({"section": new["id"], "fix": f"recovered heading '{num} {title}' at {bid}"})
         raw = sorted(raw + added, key=lambda x: self.pos[x["block_id"]])
+        # recovered unnumbered headings: in a numbered paper a 'Limitations' / 'EXPERIMENTAL SETUP' line between
+        # numbered sections is a sub-heading of the current top-level section, except end matter (References ...)
+        has_num = any(ntuple(x.get("number")) for x in raw if x.get("number") and "_kind" not in x)
+        last_top = None
+        for s in raw:
+            k = s.pop("_kind", None)
+            if k in ("named", "caps", "appendix", "roman"):
+                if has_num and last_top and not END_MATTER.match(s["title"]):
+                    s["level"], s["parent"] = 2, last_top
+                else:
+                    s["level"], s["parent"] = 1, None
+            elif k in ("cn2", "cn_section"):
+                s["parent"] = last_top
+            if (s.get("level") or 1) <= 1:
+                last_top = s["id"]
         # parents by numbering
         last_by_num = {}
         for s in raw:
@@ -338,6 +573,25 @@ class Doc:
             if cur is not None or self.blocks[bid].get("section_id"):
                 self.blocks[bid]["section_id"] = cur
         return raw
+
+    def _unnumbered_heading(self, b, txt, med, raw):
+        """A body block that is really an unnumbered / Chinese-numbered heading ('Limitations', 'EXPERIMENTAL
+        SETUP', '（二）研究对象', '附录A'): short single line, heading pattern, and bold / larger / standalone."""
+        if not txt or len(txt) > 80 or "\n" in txt.strip() or len(txt.split()) > 8:
+            return None
+        hc = classify_heading(txt)
+        if not hc or hc["kind"] == "numeric":
+            return None
+        bold = bool(b.get("bold")) or (b.get("size") or 0) > med + 0.3
+        first = min((self.pos.get(x["block_id"], 0) for x in raw), default=None)
+        before_first = first is not None and self.pos.get(b["id"], 0) < first
+        if hc["kind"] == "caps" and (not bold or before_first or b.get("page") == 1 and not raw):
+            return None
+        if hc["kind"] in ("cn1", "cn2", "cn_chapter", "cn_section", "roman", "appendix") and not bold and len(txt) > 30:
+            return None
+        if hc["kind"] == "named" and before_first and not re.match(r"^\s*(abstract|摘\s*要)", txt, re.I):
+            return None
+        return hc
 
     def _section_at(self, page, bbox):
         best = None
@@ -416,6 +670,8 @@ class Doc:
                 kind, key = "para", m.group("para")
             elif m.group("sec"):
                 kind, key = "section", m.group("sec")
+            elif m.group("line"):
+                kind, key = "line", (int(m.group("lnum")), int(m.group("lnum2") or m.group("lnum")))
             elif m.group("img"):
                 kind, key = "image", (int(m.group("ipage")), [float(x) for x in re.split(r"[\s,]+", m.group("bbox").strip()) if x])
             elif m.group("tab"):
@@ -433,6 +689,10 @@ class Doc:
         s = self.sec_by_id.get(sid, {})
         rec.update(block_id=bid, page=b["page"], bbox=b.get("bbox"), role=b.get("role"), section_id=sid,
                    section=s.get("path"), paragraph_id=self.block_para.get(bid))
+        if b.get("line_start") is not None:  # text inputs (.md/.txt/.docx): line / paragraph locators
+            rec.update(line_start=b["line_start"], line_end=b.get("line_end"))
+        if b.get("source_para") is not None:
+            rec["source_paragraph"] = b["source_para"]
         if b.get("removed"):
             rec["warning"] = "block is removed header/footer/figure text: weak evidence for body claims"
         return rec
@@ -534,6 +794,20 @@ class Doc:
                 return self._res_block(rec, hit, quote)
         return self._res_block(rec, ids[0], quote)
 
+    def _res_line(self, rec, span, quote):
+        """'L120: words' / 'L120-L131: words' for text inputs: the block(s) covering those source lines."""
+        lo, hi = min(span), max(span)
+        ids = [bid for bid in self.order if self.blocks[bid].get("line_start") is not None
+               and self.blocks[bid]["line_start"] <= hi and (self.blocks[bid].get("line_end") or self.blocks[bid]["line_start"]) >= lo]
+        if not ids:
+            return dict(rec, ok=False, check="line_not_found",
+                        hint="line anchors work for .md/.txt/.docx inputs; use the [L..] numbers shown in digest.md")
+        if quote:
+            hit, _ = self._match_quote(quote, ids)
+            if hit:
+                return self._res_block(rec, hit, quote)
+        return self._res_block(rec, ids[0], quote)
+
     def _res_section(self, rec, sid, quote):
         s = self.sec_by_id.get(sid)
         if not s:
@@ -547,30 +821,38 @@ class Doc:
                     note="whole-section anchor: too coarse to verify a specific claim")
 
     def _res_table(self, rec, n, quote):
-        t = self.tables.get(n)
-        if not t:
+        chain = self.table_chains.get(n) or ([self.tables[n]] if n in self.tables else [])
+        if not chain:
             return dict(rec, ok=False, check="table_not_found", known=sorted(self.tables))
-        cb = t.get("caption_block")
+        t0 = chain[0]
+        cb = t0.get("caption_block")
         sid = self.blocks.get(cb, {}).get("section_id") if cb else None
-        rec.update(table=f"Table {n}", table_id=t.get("id"), page=t.get("page"), bbox=t.get("bbox"),
-                   caption=(t.get("caption") or "")[:200], caption_block=cb, section_id=sid,
+        rec.update(table=f"Table {n}", table_id=t0.get("id"), page=t0.get("page"), bbox=t0.get("bbox"),
+                   caption=(t0.get("caption") or "")[:200], caption_block=cb, section_id=sid,
                    section=self.sec_by_id.get(sid, {}).get("path"))
         if not quote:
             return dict(rec, ok=True, check="table_exists")
-        texts = [t.get("caption") or ""] + [" ".join(r) if isinstance(r, list) else str(r) for r in t.get("rows", [])]
-        texts += [c.get("text") or "" for c in t.get("cells", [])]
         tq = tight(quote)
-        rows = [" | ".join(r) if isinstance(r, list) else str(r) for r in t.get("rows", [])]
-        hits = [r for r in rows if tq and tq in tight(r)]
-        if not hits:
-            # "row label ... value": every token of the quote inside one row
-            toks = [tight(x) for x in re.split(r"[\s|;,]+", quote) if tight(x)]
-            hits = [r for r in rows if toks and all(tk in tight(r) for tk in toks)]
-        if hits:
-            return dict(rec, ok=True, check="quote_in_table", matched_rows=hits[:3])
-        for tx in texts:
-            if tq and tq in tight(tx):
-                return dict(rec, ok=True, check="quote_in_table")
+        toks = [tight(x) for x in re.split(r"[\s|;,]+", quote) if tight(x)]
+        for t in chain:
+            rows = [" | ".join(str(c or "") for c in r) if isinstance(r, list) else str(r) for r in t.get("rows", [])]
+            hits = [r for r in rows if tq and tq in tight(r)]
+            if not hits:
+                hits = [r for r in rows if toks and all(tk in tight(r) for tk in toks)]
+            if hits:
+                tcb = t.get("caption_block") or cb
+                tsid = self.blocks.get(tcb, {}).get("section_id") if tcb else sid
+                return dict(rec, ok=True, check="quote_in_table", matched_rows=hits[:3],
+                            table_id=t.get("id"), page=t.get("page"), bbox=t.get("bbox"),
+                            caption=(t.get("caption") or "")[:200], section_id=tsid,
+                            section=self.sec_by_id.get(tsid, {}).get("path"))
+            texts = [t.get("caption") or ""] + [" ".join(str(c or "") for c in r) if isinstance(r, list) else str(r) for r in t.get("rows", [])]
+            texts += [c.get("text") or "" for c in t.get("cells", [])]
+            for tx in texts:
+                if tq and tq in tight(tx):
+                    return dict(rec, ok=True, check="quote_in_table",
+                                table_id=t.get("id"), page=t.get("page"), bbox=t.get("bbox"),
+                                caption=(t.get("caption") or "")[:200])
         return dict(rec, ok=False, check="quote_not_in_table",
                     hint="quote = words of one row (row label + value) or of the caption")
 
@@ -641,6 +923,10 @@ class Doc:
 
     # -- cue sentences ----------------------------------------------------
     def cue_sentences(self, per_kind=8):
+        """Candidate sentences per card field. Strong author-voice cues ('a limitation of this study',
+        'trained for 90 epochs', '本研究的局限') outrank generic words ('does not', 'condition'), sentences in a
+        matching section ('Limitations', 'Experimental setup') are boosted, and table rows with the key metrics
+        are given as paste-ready, already-verified 'Table N: row label value' anchors."""
         out = {k: [] for k in CUES}
         for bid in self.order:
             b = self.blocks[bid]
@@ -651,14 +937,79 @@ class Doc:
                 continue
             title = (s.get("path") or "") + " " + ("abstract" if b.get("role") == "abstract" else "")
             for sent in split_sentences(b.get("text") or ""):
-                if len(sent) < 25:
+                if len(sent) < 25 and not re.search(r"[一-鿿]{8,}", sent):
                     continue
                 for k, rx in CUE_RE.items():
-                    if rx.search(sent):
-                        score = 1.0 + (1.5 if re.search(SECTION_HINT[k], title, re.I) else 0.0)
-                        if k == "main_findings":
-                            score += 0.3 * len(NUM_RE.findall(sent))
-                        out[k].append({"anchor": f"{bid}: {sent[:160]}", "section": s.get("path"), "score": round(score, 2)})
+                    strong = CUE_STRONG_RE.get(k)
+                    st = bool(strong and strong.search(sent))
+                    if not (st or rx.search(sent)):
+                        continue
+                    score = 1.0 + (2.0 if st else 0.0) + (1.5 if re.search(SECTION_HINT[k], title, re.I) else 0.0)
+                    if k in CUE_OWN_SECTION and re.search(CUE_OWN_SECTION[k], s.get("title") or "", re.I):
+                        score += 2.0
+                    if k == "main_findings":
+                        score += 0.3 * min(len(NUM_RE.findall(sent)), 5)
+                    if k == "conditions":
+                        score += 0.4 * min(len(re.findall(UNIT_RE, sent)), 4)
+                    if k == "limitations" and not st and not rx.search(CUE_WEAK_LIMIT.sub(" ", sent)):
+                        score -= 0.8  # only 'does not' / 'cannot': usually a method statement, not a limitation
+                    out[k].append({"anchor": f"{bid}: {sent[:160]}", "section": s.get("path"), "score": round(score, 2),
+                                   **({"strong_cue": True} if st else {})})
         for k in out:
             out[k] = sorted(out[k], key=lambda x: -x["score"])[:per_kind]
+        try:
+            out["table_rows"] = self.table_row_cues()
+        except Exception as e:  # noqa: BLE001  (a cue must never block init)
+            out["table_rows"] = []
+            out["table_rows_error"] = f"{type(e).__name__}: {e}"
+        out["sections_of_interest"] = {
+            k: [f"{x['id']} {x.get('number') or ''} {x.get('title')}".replace("  ", " ") for x in self.sections
+                if not x.get("skip") and re.search(SECTION_HINT[k], x.get("title") or "", re.I)][:6]
+            for k in ("data", "method", "conditions", "main_findings", "limitations", "conclusion")}
+        out["_how_to"] = ("Candidates, not answers: read the sentence (and its block in digest.md) before citing. "
+                          "strong_cue = author-voice phrase. table_rows anchors are pre-checked 'Table N: label value'.")
         return out
+
+    def table_row_cues(self, per_table=4, max_tables=12):
+        """Rows most likely to carry the key result: the proposed method ('ours', 'proposed', '本文'), rows holding
+        the best/worst value of a numeric column, rows with many numbers. Each anchor is resolved before it is offered."""
+        res = []
+        for n, t in list(self.tables.items())[:max_tables]:
+            rows = [r if isinstance(r, list) else [str(r)] for r in t.get("rows", [])]
+            if len(rows) < 2:
+                continue
+            header = rows[0]
+            body = [r for r in rows[1:] if r and any(NUM_RE.search(c or "") for c in r[1:])]
+            if not body:
+                continue
+            best = set()
+            for ci in range(1, max(len(r) for r in body)):
+                vals = []
+                for ri, r in enumerate(body):
+                    if ci < len(r):
+                        m = re.search(r"-?\d+(?:\.\d+)?", (r[ci] or "").replace(",", ""))
+                        if m:
+                            vals.append((float(m.group()), ri))
+                if len(vals) >= 2:
+                    best.add(max(vals)[1])
+                    best.add(min(vals)[1])
+
+            def rank(ri):
+                r = body[ri]
+                lab = (r[0] or "").lower()
+                return (3 if re.search(r"\bours?\b|proposed|本文|our method|\(ours\)", lab) else 0) + \
+                       (1 if ri in best else 0) + 0.1 * sum(bool(NUM_RE.search(c or "")) for c in r)
+            for ri in sorted(range(len(body)), key=lambda i: -rank(i))[:per_table]:
+                r = body[ri]
+                label = str(r[0] or "").strip()
+                vals = [str(c).strip() for c in r[1:] if c and NUM_RE.search(str(c))][:3]
+                if not label or not vals or "�" in label + vals[0] or len(re.sub(r"\W", "", label)) < 2:
+                    continue
+                q = f"{label} {vals[0]}"
+                chk = self._res_table({"raw": f"Table {n}: {q}", "kind": "table", "quote": q}, n, q)
+                if chk.get("check") != "quote_in_table":
+                    continue
+                res.append({"anchor": f"Table {n}: {q}", "row": " | ".join(c or "" for c in r)[:200],
+                            "header": " | ".join(h or "" for h in header)[:200], "caption": (t.get("caption") or "")[:120],
+                            "section": self.sec_by_id.get(chk.get("section_id"), {}).get("path")})
+        return res

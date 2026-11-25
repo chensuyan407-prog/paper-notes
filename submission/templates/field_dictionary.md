@@ -1,8 +1,12 @@
-# Field dictionary (paper-notes 1.0.0)
+# Field dictionary (paper-notes 1.1.0)
 
 Every note item: `{"text": str, "anchors": [resolved anchor], "check": {"status": verified|needs_review|failed, "problems", "review"}}`.
-Resolved anchor: `kind` (block/para/table/figure/equation/image/section), `page`, `block_id`, `paragraph_id`, `bbox`
-(PDF points, origin top-left), `section_id`, `section` (path, e.g. `3 Method > 3.2 Loss`), `quote`, `check`, `ok`.
+Resolved anchor: `kind` (block/para/line/table/figure/equation/image/section), `page`, `block_id`, `paragraph_id`, `bbox`
+(PDF points, origin top-left; null for text inputs), `line_start`/`line_end` (source lines, .md/.txt), `source_paragraph`
+(.docx paragraph index), `source` + `source_file` (supplement key S1.. when the anchor was prefixed `S1::`; section ids
+then read `S1:s3`), `section_id`, `section` (path, e.g. `3 Method > 3.2 Loss`), `quote`, `check`, `ok`.
+`check.number_equivalence` lists numbers accepted in another unit/notation (`60 == 6e+09`); `check.small_numbers_unchecked`
+lists single digits / years not checked.
 
 ## Paper card (`notes.paper_card`, same keys for every paper)
 
@@ -31,12 +35,23 @@ Machine: coverage of top-level sections, anchors inside the section, order. Huma
 ## Knowledge points (`notes.knowledge_points`)
 
 `term`, `aliases`, `kind` (concept, term, abbreviation, variable, method, dataset, metric, finding, assumption, formula),
-`definition`, `other_definitions` + `definition_conflict` (when merged entries disagree), `abbreviation`
-{`abbr`, `expansion_in_paper`, `status`: found_in_text | expansion_not_printed}, `section_id`, anchors, check.
-Machine: dedupe by normalised term/alias, abbreviation expansion printed. Human: definition correctness.
+`definition`, `other_definitions` + `definition_conflict` {`first`, `disagreeing`: [{definition, section_id, why}]} when merged
+entries disagree (different numbers / low word overlap) or `definitions_agree: true`, `abbreviation` {`abbr`,
+`expansion_in_paper`, `status`: found_in_text | expansion_not_printed | expansion_mismatch, `note`}, `section_id`, anchors, check.
+`verification.knowledge_conflicts`: `abbreviation_collision` (same abbreviation, different long forms: kept apart) and
+`definition_conflict` entries. Machine: dedupe by normalised term/alias/long form, collisions, definition drift,
+abbreviation expansion printed. Human: definition correctness.
+
+## Sources and visual pages
+
+`sources[]`: `file`, `format` (pdf/md/txt/docx), `role` (primary/supplement/unparsed), `source_key` (primary, S1, ...),
+`role_reasons` (why: role=, key=, file name), `sha256`, `parse_status`, `page_count`, `warnings`.
+`verification.visual_pages[]`: `page`, `kind` (image_only | mixed), `reason`, `image` (PNG path), `read` (an image/figure
+anchor cites that page). Unread pages are added to `uncertainty` with `auto: true`. `verification.draft_repairs`: what the
+lenient draft reader fixed or re-mapped.
 
 ## Status values
 
 `result.status`: success (no failed item, required card fields filled or unreported with reason, all top-level
-sections covered, all contract fields filled) · partial (reason in `run_status.reason`) · failed (no PDF / encrypted /
+sections covered, all contract fields filled) · partial (reason in `run_status.reason`) · failed (no input file / encrypted /
 unparseable; nothing invented). `run_status.human_takeover` points to `verification.failed_items` / `review_items`.

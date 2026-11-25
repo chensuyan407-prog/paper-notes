@@ -25,7 +25,7 @@ def main():
     os.makedirs(out, exist_ok=True)
     t0 = time.time()
     r = subprocess.run([sys.executable, os.path.join(ROOT, "tests", "run_tests.py")], capture_output=True, text=True,
-                       encoding="utf-8")
+                       encoding="utf-8", errors="replace", env=dict(os.environ, PYTHONIOENCODING="utf-8"))
     lines = [ln for ln in r.stdout.splitlines() if ln.startswith(("PASS", "FAIL"))]
     metrics = {"self_test": {"passed": sum(ln.startswith("PASS") for ln in lines), "total": len(lines),
                              "exit_code": r.returncode, "lines": lines}}

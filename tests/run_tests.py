@@ -82,6 +82,10 @@ def items():
 
 
 def main():
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+    except Exception:  # noqa: BLE001
+        pass
     ap = argparse.ArgumentParser()
     ap.add_argument("--keep", default=None)
     a = ap.parse_args()
@@ -190,6 +194,15 @@ def main():
     i3 = run("init", "--case", os.path.join(d3, "input", "case.json"), "--out", os.path.join(d3, "output"), "--work", os.path.join(d3, "work"))
     expect("scanned_pseudo_section", True, any("image-only" in x or "no heading" in x for x in i3["outline"]) or bool(i3["unresolved_pages"][0]) is False,
            "; ".join(i3["outline"][:2]))
+
+    # ---------------- v1.1: multi-format inputs, primary/supplement, number equivalence, knowledge, draft safety, mixed pages
+    import test_v11  # noqa: E402
+    try:
+        test_v11.main(root, expect)
+    except Exception as e:  # noqa: BLE001
+        import traceback
+        traceback.print_exc()
+        expect("v11_suite_completed", True, False, f"{type(e).__name__}: {e}")
 
     w = max(len(r[0]) for r in results)
     for r in results:
