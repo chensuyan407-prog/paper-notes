@@ -27,5 +27,5 @@ PASS  output_verification.json                 expected=True           actual=Tr
 PASS  encrypted_status_failed                  expected=failed         actual=failed         paper.pdf: encrypted
 PASS  scanned_pseudo_section                   expected=True           actual=True           s1 L1  [page 1, image-only page, read the page image] pp1-1
 
-28/28 passed; work dir <tmp>\paper_notes_test_s452vg3t
+28/28 passed; work dir C:\Users\12117\AppData\Local\Temp\paper_notes_test_4kdcaep1
 

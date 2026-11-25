@@ -34,5 +34,5 @@
    "PASS  scanned_pseudo_section                   expected=True           actual=True           s1 L1  [page 1, image-only page, read the page image] pp1-1"
   ]
  },
- "seconds": 1.44
+ "seconds": 1.21
 }

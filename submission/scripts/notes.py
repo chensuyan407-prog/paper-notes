@@ -60,7 +60,7 @@ def load_state(work):
 
 
 # ------------------------------------------------------------------ case discovery
-CONTRACT_KEYS = ("output_contract", "outputs_contract", "output_schema", "required_outputs", "output_fields", "outputs")
+CONTRACT_KEYS = ("output_contract", "outputs_contract", "output_schema", "required_outputs", "output_fields", "outputs", "schema", "deliverables")
 
 
 def find_contract(obj):
@@ -80,16 +80,23 @@ def find_contract(obj):
     return None
 
 
-def contract_fields(c):
+def parse_contract(c):
     if c is None:
-        return []
+        return [], {}
     if isinstance(c, dict):
-        for k in ("fields", "required", "required_fields", "properties"):
+        if "properties" in c or "required" in c:
+            spec = dict(c.get("properties") or {}) if isinstance(c.get("properties"), dict) else {}
+            req = c.get("required") if isinstance(c.get("required"), list) else []
+            for nm in req:
+                if isinstance(nm, str) and nm not in spec:
+                    spec[nm] = {}
+            return list(spec.keys()), spec
+        for k in ("fields", "required_fields"):
             if k in c:
-                return contract_fields(c[k])
-        return list(c.keys())
+                return parse_contract(c[k])
+        return list(c.keys()), c
     if isinstance(c, list):
-        out = []
+        out, spec = [], {}
         for it in c:
             if isinstance(it, str):
                 out.append(it)
@@ -97,8 +104,13 @@ def contract_fields(c):
                 n = it.get("name") or it.get("field") or it.get("key") or it.get("id")
                 if n:
                     out.append(n)
-        return out
-    return [c] if isinstance(c, str) else []
+                    spec[n] = it
+        return out, spec
+    return ([c], {}) if isinstance(c, str) else ([], {})
+
+
+def contract_fields(c):
+    return parse_contract(c)[0]
 
 
 def pdf_strings(obj, acc):
@@ -265,7 +277,7 @@ def cmd_init(a):
             for p in sorted(glob.glob(os.path.join(b, "**", "*.pdf"), recursive=True)):
                 if p not in pdfs:
                     pdfs.append(p)
-    fields = contract_fields(find_contract(case))
+    fields, cspec = parse_contract(find_contract(case))
     case_id = case.get("case_id") or case.get("id") or os.environ.get("CASE_ID")
     import parse_pdf  # noqa: E402
     sources, summary_docs = [], []
@@ -288,7 +300,7 @@ def cmd_init(a):
             summary_docs.append((src, D))
     # one primary document (first parsed); others listed as extra sources
     state = {"version": L.VERSION, "case": os.path.abspath(a.case), "case_id": case_id, "task": task,
-             "contract_fields": fields, "sources": sources, "out": os.path.abspath(a.out),
+             "contract_fields": fields, "contract_spec": cspec, "sources": sources, "out": os.path.abspath(a.out),
              "work": os.path.abspath(a.work), "init_at": now()}
     outline = []
     if summary_docs:
@@ -625,7 +637,31 @@ AUTO_MAP = [
     (r"conclusion|结论", "@card.conclusion"),
     (r"evidence|source|anchor|证据|来源", "@evidence"),
     (r"notes?$|markdown|笔记", "@notes_md"),
+    (r"summary|overview|answer|report|摘要|总结|报告", "@card"),
 ]
+
+
+def _coerce_contract(val, sp):
+    if not isinstance(sp, dict) or not isinstance(sp.get("type"), str) or val is None:
+        return val
+    t = sp["type"].lower()
+    if t == "string":
+        if isinstance(val, str):
+            return val
+        if isinstance(val, list) and all(isinstance(x, str) for x in val):
+            return "\n".join(val)
+        return json.dumps(val, ensure_ascii=False)
+    if t == "array" and not isinstance(val, list):
+        return [{"key": k, "value": v} for k, v in val.items()] if isinstance(val, dict) else [val]
+    if t == "object" and not isinstance(val, dict):
+        return {"items": val} if isinstance(val, list) else {"value": val}
+    if t == "integer" and not isinstance(val, int):
+        return len(val) if isinstance(val, (list, dict, str)) else 0
+    if t == "number" and not isinstance(val, (int, float)):
+        return float(len(val)) if isinstance(val, (list, dict, str)) else 0.0
+    if t == "boolean":
+        return bool(val)
+    return val
 
 
 def walk_anchors(v, ck, where):
@@ -755,8 +791,12 @@ def cmd_build(a):
     md_path = os.path.join(out, "notes.md")
     # contract fields
     cmap = dict(draft.get("contract") or {})
+    cspec = state.get("contract_spec") or {}
     for f in state["contract_fields"]:
         v = cmap.get(f)
+        if v is None and f in ("notes", "status", "evidence", "sources", "unreported", "uncertainty", "conflicts", "verification", "change_log"):
+            res[f] = _coerce_contract(res.get(f), cspec.get(f))
+            continue
         if v is None:
             ref = next((r for pat, r in AUTO_MAP if re.search(pat, f, re.I)), None)
             if ref:
@@ -764,10 +804,10 @@ def cmd_build(a):
                 res["change_log"].append({"at": now(), "step": "contract_auto_map", "detail": f"{f} <- {ref}"})
         val, is_ref = resolve_ref(v, res, md_path)
         if is_ref:
-            res[f] = val
+            res[f] = _coerce_contract(val, cspec.get(f))
         elif v is not None:
-            res[f] = walk_anchors(v, ck, f"contract.{f}")
-        if res[f] in (None, [], {}) and not any(u.get("field") == f for u in unreported):
+            res[f] = _coerce_contract(walk_anchors(v, ck, f"contract.{f}"), cspec.get(f))
+        if res.get(f) in (None, [], {}) and not any(u.get("field") == f for u in unreported):
             res["unreported"].append({"field": f, "reason": "contract field not filled by the agent (no mapping)"})
             res["status"] = "partial"
     # re-count after contract literals added records

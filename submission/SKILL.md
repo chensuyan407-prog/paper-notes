@@ -17,7 +17,11 @@ Budget-aware: the whole flow is ~6-12 model requests. **Save early** (init alrea
 
 1. **Init** (seconds):
    ```bash
-   python $SKILL_DIR/scripts/notes.py init --case /input/case.json --out /app/output --work /app/work
+   PY=$(command -v python3 || command -v python)
+   for d in "${SKILL_DIR:-}" /skills/weekly-skill /app/submission /app/skills "$(pwd)"; do
+     [ -f "$d/scripts/notes.py" ] && SKILL_DIR="$d" && break
+   done
+   "$PY" "$SKILL_DIR/scripts/notes.py" init --case /input/case.json --out /app/output --work /app/work
    ```
    Prints `case_id`, `contract_fields`, `parse_status`, the **outline** (`s4 L2 3.1 Residual Learning pp3-3`), and paths.
    Writes `/app/output/result.json` (status `partial`, every contract field null), `/app/work/digest.md`,
@@ -27,8 +31,8 @@ Budget-aware: the whole flow is ~6-12 model requests. **Save early** (init alrea
    grouped by **the paper's sections**, every paragraph prefixed by its anchor `[p3-b12]`; tables/figures/equations
    listed under their section. `cues.json` = candidate sentences per card field (research_question, data, conditions,
    main_findings, limitations, ...) with anchors - a shortcut, not an answer: read the sentence before using it.
-   More text: `python $SKILL_DIR/scripts/notes.py find "query words" [--section 3.2]` (prints paste-ready anchors);
-   tables: `python $SKILL_DIR/scripts/table_query.py /app/output/parsed/<stem> --table "Table 2" --list`.
+   More text: `"$PY" "$SKILL_DIR/scripts/notes.py" find "query words" [--section 3.2]` (prints paste-ready anchors);
+   tables: `"$PY" "$SKILL_DIR/scripts/table_query.py" /app/output/parsed/<stem> --table "Table 2" --list`.
 3. **Write `/app/work/draft.json`** (keep its shape; one file write). Every note item is
    `{"text": "your note", "a": ["p3-b12: 6-25 words copied verbatim from that block", "Table 2: ResNet-152 4.49"]}`;
    a field holds one item or a list.
@@ -49,7 +53,7 @@ Budget-aware: the whole flow is ~6-12 model requests. **Save early** (init alrea
    Notes in the task's language; quotes stay verbatim in the paper's language. Numbers exactly as printed.
 4. **Build + verify**:
    ```bash
-   python $SKILL_DIR/scripts/notes.py build --work /app/work
+   "$PY" "$SKILL_DIR/scripts/notes.py" build --work /app/work
    ```
    Writes `/app/output/result.json`, `notes.md`, `paper_card.json`, `paper_card.csv`, `knowledge_points.jsonl`,
    `verification.json`; prints `fix_these` / `review` / `uncovered_sections` / `card_missing`.
