@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.2.0 - 2026-11-27
+- SKILL.md 137 -> 80 lines: three steps (init + digest in one call; write 2-3 part files; `N build part*.json`).
+- `build PART...` merges the parts and builds in one call; `merge` rejects only the unreadable part (others merge,
+  exit 0); a broken draft.json with parts given restarts from draft.bak.json; `load_state` runs init with the
+  defaults when it was skipped and /input/case.json exists.
+- Status: notes that fail their check move to `verification.dropped_items` (not delivered); `partial` only when
+  research_question / method / main_findings lack a verified note, < half of the top-level sections have notes, or
+  a contract field is unmapped. Uncovered sections, unread image pages, unknown section ids, non-core card gaps,
+  mapped-but-empty contract fields and type coercions become `run_status.warnings`.
+- Fixed: `unreported` entries named `card.X` now satisfy a contract field mapped to `@card.X`.
+- `card.title` is auto-filled (and checked) from the parsed title block when left empty.
+- `tests/test_v11.py` runs standalone.
+
 ## 1.1.0 - 2026-11-25
 - Inputs: `.md` / `.markdown` / `.txt` / `.docx` papers (new `scripts/textdoc.py`, stdlib only) with line / Word-paragraph
   locators and `L120:` anchors; primary-paper choice by `--primary` > role > key > supplement-like name > format;

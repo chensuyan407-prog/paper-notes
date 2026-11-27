@@ -1,7 +1,7 @@
 {
  "self_test": {
-  "passed": 77,
-  "total": 77,
+  "passed": 84,
+  "total": 84,
   "exit_code": 0,
   "lines": [
    "PASS  outline_headings                         expected=['1 Introduction', '2 Method', '2.1 Reading order', '3 Results', 'References'] actual=['1 Introduction', '2 Method', '2.1 Reading order', '3 Results', 'References'] ",
@@ -24,8 +24,12 @@
    "PASS  section_order_follows_paper              expected=['1 Introduction', '2 Method', '2.1 Reading order', '3 Results'] actual=['1 Introduction', '2 Method', '2.1 Reading order', '3 Results'] ",
    "PASS  knowledge_merged                         expected=1              actual=1              ",
    "PASS  contract_auto_map_limitations            expected=True           actual=True           ",
-   "PASS  status_partial_when_failures             expected=partial        actual=partial        ",
+   "PASS  failed_items_not_in_notes                expected=False          actual=False          ",
+   "PASS  status_success_with_warnings             expected=['success', True] actual=['success', True] ",
+   "PASS  uncovered_section_is_warning             expected=True           actual=True           ",
+   "PASS  status_partial_when_core_missing         expected=partial        actual=partial        core card fields without a verified note: ['research_question', 'method', 'main_findings']; only 0/3 top-level sections have notes",
    "PASS  card_missing_none_when_filled_or_failed  expected=[]             actual=[]             ",
+   "PASS  failed_only_field_auto_unreported        expected=True           actual=True           ",
    "PASS  output_notes.md                          expected=True           actual=True           ",
    "PASS  output_paper_card.csv                    expected=True           actual=True           ",
    "PASS  output_knowledge_points.jsonl            expected=True           actual=True           ",
@@ -60,7 +64,7 @@
    "PASS  contract_limitations_auto                expected=True           actual=True           ",
    "PASS  sections_by_number_and_title             expected=True           actual=True           ",
    "PASS  broken_draft_exit_4                      expected=4              actual=4              ",
-   "PASS  broken_draft_result_untouched            expected=8679144bab309fa53f1d496ecacb86f03446b21882ba69fb9e3430374163d88c actual=8679144bab309fa53f1d496ecacb86f03446b21882ba69fb9e3430374163d88c ",
+   "PASS  broken_draft_result_untouched            expected=30b80915649977f6dbf824a215290c23d96a943d79abf5c80b52338680dceab4 actual=30b80915649977f6dbf824a215290c23d96a943d79abf5c80b52338680dceab4 ",
    "PASS  broken_draft_error_file                  expected=True           actual=True           ",
    "PASS  lenient_draft_repaired                   expected=True           actual=True           ['removed ``` code fence', 'removed trailing commas']",
    "PASS  regression_warning                       expected=True           actual=True           ",
@@ -80,8 +84,11 @@
    "PASS  mixed_page_flagged                       expected=True           actual=True           ['p3: large image covers 43% of the page, text layer only 126 chars']",
    "PASS  mixed_page_in_digest                     expected=True           actual=True           ",
    "PASS  mixed_page_unread_uncertainty            expected=True           actual=True           ",
-   "PASS  mixed_page_read_after_image_anchor       expected=[True, 'needs_review'] actual=[True, 'needs_review'] "
+   "PASS  mixed_page_read_after_image_anchor       expected=[True, 'needs_review'] actual=[True, 'needs_review'] ",
+   "PASS  build_with_parts_exit_0                  expected=0              actual=0              ",
+   "PASS  build_with_parts_rejects_bad_part        expected=True           actual=True           ",
+   "PASS  build_with_parts_merged_good_part        expected=True           actual=True           "
   ]
  },
- "seconds": 4.15
+ "seconds": 6.74
 }

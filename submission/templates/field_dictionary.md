@@ -1,4 +1,4 @@
-# Field dictionary (paper-notes 1.1.0)
+# Field dictionary (paper-notes 1.2.0)
 
 Every note item: `{"text": str, "anchors": [resolved anchor], "check": {"status": verified|needs_review|failed, "problems", "review"}}`.
 Resolved anchor: `kind` (block/para/line/table/figure/equation/image/section), `page`, `block_id`, `paragraph_id`, `bbox`
@@ -52,6 +52,7 @@ lenient draft reader fixed or re-mapped.
 
 ## Status values
 
-`result.status`: success (no failed item, required card fields filled or unreported with reason, all top-level
-sections covered, all contract fields filled) · partial (reason in `run_status.reason`) · failed (no input file / encrypted /
+`result.status`: success (core notes delivered: research_question, method and main_findings have a verified note or a
+stated reason, at least half of the top-level sections have notes, every contract field mapped; failed notes are left out
+into `verification.dropped_items` and listed with other gaps in `run_status.warnings`) · partial (reason in `run_status.reason`) · failed (no input file / encrypted /
 unparseable; nothing invented). `run_status.human_takeover` points to `verification.failed_items` / `review_items`.

@@ -18,7 +18,7 @@ import os
 import re
 import unicodedata
 
-VERSION = "paper-notes 1.1.0"
+VERSION = "paper-notes 1.2.0"
 
 # Unified paper-card fields (same keys for every paper, so cards can be compared side by side).
 CARD_FIELDS = [

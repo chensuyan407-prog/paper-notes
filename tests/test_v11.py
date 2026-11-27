@@ -216,6 +216,7 @@ def main(root, expect):
     b = run("build", "--work", W)
     res = json.load(open(os.path.join(O, "result.json"), encoding="utf-8"))
     by = {it.get("label"): it for v in res["notes"]["paper_card"].values() for it in v if it.get("label")}
+    by.update({it["label"]: it for it in res["verification"]["dropped_items"] if it.get("label")})
     card = res["notes"]["paper_card"]
     expect("line_anchor_verified", "verified", card["research_question"][0]["check"]["status"])
     expect("line_anchor_has_lines", True, card["research_question"][0]["anchors"][0].get("line_start") == ln_intro)
@@ -331,3 +332,28 @@ def main(root, expect):
     r3 = json.load(open(os.path.join(O, "result.json"), encoding="utf-8"))
     expect("mixed_page_read_after_image_anchor", [True, "needs_review"],
            [r3["verification"]["visual_coverage"]["read"] == 1, r3["notes"]["paper_card"]["main_findings"][0]["check"]["status"]])
+
+    # v1.2: one-step `build part.json ...` (merge + build); a broken part is rejected, the good one still lands
+    open(os.path.join(W, "bad.json"), "w", encoding="utf-8").write('{"card": {"method": ')
+    json.dump({"card": {"method": {"text": "Layout-aware parsing", "a": ["p1-b1: Layout-Aware Parsing"]}}},
+              open(os.path.join(W, "good.json"), "w", encoding="utf-8"))
+    ob = run("build", os.path.join(W, "bad.json"), os.path.join(W, "good.json"), "--work", W)
+    expect("build_with_parts_exit_0", 0, ob["_code"])
+    expect("build_with_parts_rejects_bad_part", True, any(x.get("file", "").endswith("bad.json") for x in (ob.get("merge") or {}).get("rejected", [])))
+    r4 = json.load(open(os.path.join(O, "result.json"), encoding="utf-8"))
+    expect("build_with_parts_merged_good_part", True, bool(r4["notes"]["paper_card"]["method"]))
+
+
+if __name__ == "__main__":  # standalone: python tests/test_v11.py (run_tests.py also runs this suite)
+    import tempfile
+    results = []
+
+    def _expect(name, exp, got, note=""):
+        results.append(("PASS" if exp == got else "FAIL", name, exp, got, note))
+
+    _root = tempfile.mkdtemp(prefix="paper_notes_v11_")
+    main(_root, _expect)
+    for st, name, exp, got, note in results:
+        print(f"{st}  {name:<40} expected={exp!s:<14} actual={got!s:<14} {str(note)[:100]}")
+    print(f"\n{sum(r[0] == 'PASS' for r in results)}/{len(results)} passed; work dir {_root}")
+    sys.exit(0 if all(r[0] == "PASS" for r in results) else 1)

@@ -6,7 +6,8 @@
                           [--primary FILE] [--pages 1-12] [--password PW] [--full-digest] [--force]
     python notes.py merge part1.json [part2.json ...] | --json '{"card": {...}}'   (write the draft in parts)
     python notes.py add   card.limitations --text "..." --a "p9-b3: words" [--append]   (one item)
-    python notes.py build [--draft /app/work/draft.json] [--out /app/output] [--dry-run]
+    python notes.py build [part1.json ...] [--draft /app/work/draft.json] [--out /app/output] [--dry-run]
+                          (parts given -> merged first; merge + check + write in one call)
     python notes.py find  "query words" [--section 3.2] [--source S1] [--top 5]   (search, prints anchors ready to paste)
 
 init  : parse the PDF (parse_pdf.py), build the paper's own outline, write
@@ -52,6 +53,10 @@ def load(path):
 
 def load_state(work):
     p = os.path.join(work, STATE)
+    if not os.path.exists(p) and os.path.exists("/input/case.json"):
+        # init was skipped: run it with the defaults instead of failing (one request saved, no dead end)
+        cmd_init(argparse.Namespace(case="/input/case.json", out="/app/output", work=work, pdf=[], input=[], primary=None,
+                                    pages=None, password=None, full_digest=False, force=False))
     if not os.path.exists(p):
         print(json.dumps({"error": f"{p} not found", "hint": "run `notes.py init` first with the same --work directory"}))
         sys.exit(2)
@@ -215,9 +220,15 @@ def role_score(c, explicit=None):
     name = os.path.basename(c.get("resolved") or c["path"])
     role, key = (c.get("role_hint") or "").strip(), str(c.get("key") or "")
     sc, why = 0.0, []
-    if explicit and (os.path.basename(explicit) == name or explicit == c["path"]):
-        sc += 100
-        why.append("--primary")
+    if explicit:
+        has_sep = os.sep in explicit or "/" in explicit
+        if has_sep:
+            if os.path.abspath(explicit) == os.path.abspath(c.get("resolved") or c["path"]):
+                sc += 100
+                why.append("--primary")
+        elif os.path.basename(explicit) == name or explicit == c["path"]:
+            sc += 100
+            why.append("--primary")
     if role and PRIMARY_RX.match(role):
         sc += 50
         why.append(f"role={role}")
@@ -463,8 +474,10 @@ def discover_inputs(case, a, case_dir):
     cands = input_candidates(case, [])
     for x in list(a.pdf or []) + list(getattr(a, "input", None) or []):
         cands.append({"path": x, "key": "cli", "role_hint": None, "order": 0})
-    if a.primary and not any(os.path.basename(c["path"]) == os.path.basename(a.primary) for c in cands):
-        cands.append({"path": a.primary, "key": "cli", "role_hint": "primary", "order": 0})
+    if a.primary:
+        has_sep = os.sep in a.primary or "/" in a.primary
+        if not any((os.path.abspath(c["path"]) == os.path.abspath(a.primary) if has_sep else os.path.basename(c["path"]) == os.path.basename(a.primary)) for c in cands):
+            cands.append({"path": a.primary, "key": "cli", "role_hint": "primary", "order": 0})
     seen, out, missing, missing_primary = set(), [], [], []
     for c in cands:
         r = resolve_path(c["path"], bases)
@@ -646,10 +659,11 @@ def cmd_init(a):
         result["unreported"] = [{"field": f, "reason": reason} for f in fields]
     rp = os.path.join(a.out, "result.json")
     keep_prev = False
-    if os.path.exists(rp) and not a.force:  # re-running init must not wipe notes already built
+    if os.path.exists(rp):  # re-running init must not wipe notes already built (or overwrite with a failed --force)
         try:
             prev = load(rp)
-            keep_prev = (prev.get("run_status") or {}).get("stage") == "build"
+            prev_built = (prev.get("run_status") or {}).get("stage") == "build"
+            keep_prev = prev_built and (not a.force or failed)
         except Exception:  # noqa: BLE001
             keep_prev = False
     if not keep_prev:
@@ -1151,6 +1165,7 @@ def resolve_ref(ref, res, md_path):
     return None, False
 
 
+CORE_CARD = ("research_question", "method", "main_findings")  # without these the notes are not usable -> partial
 AUTO_MAP = [
     (r"(?<![a-z0-9])(?:card|paper_card|summary_card)(?![a-z0-9])|结构化|卡片", "@card"),
     (r"(?<![a-z0-9])(?:sections?|chapters?)(?![a-z0-9])|章节", "@sections"),
@@ -1268,14 +1283,31 @@ def _coerce_contract(val, sp):
     return validate_and_coerce_contract(val, sp)[0]
 
 
-def walk_anchors(v, ck, where):
+def walk_anchors(v, ck, where, dropped=None):
     """Resolve anchors inside literal contract values (dicts with 'a'/'anchors')."""
     if isinstance(v, dict):
         if "a" in v or "anchors" in v:
-            return ck.check_item({"text": v.get("text") or json.dumps({k: x for k, x in v.items() if k not in ("a", "anchors")}, ensure_ascii=False), **v}, where)
-        return {k: walk_anchors(x, ck, f"{where}.{k}") for k, x in v.items()}
+            it = ck.check_item({"text": v.get("text") or json.dumps({k: x for k, x in v.items() if k not in ("a", "anchors")}, ensure_ascii=False), **v}, where)
+            if (it.get("check") or {}).get("status") == "failed":
+                if dropped is not None:
+                    dropped.append(dict(it, where=where))
+                return None
+            return it
+        out_d = {}
+        for k, x in v.items():
+            wx = walk_anchors(x, ck, f"{where}.{k}", dropped)
+            if wx is None and x is not None:
+                continue
+            out_d[k] = wx
+        return out_d
     if isinstance(v, list):
-        return [walk_anchors(x, ck, f"{where}[{i}]") for i, x in enumerate(v)]
+        out_l = []
+        for i, x in enumerate(v):
+            wx = walk_anchors(x, ck, f"{where}[{i}]", dropped)
+            if wx is None and x is not None:
+                continue
+            out_l.append(wx)
+        return out_l
     return v
 
 
@@ -1547,31 +1579,41 @@ def merge_fragment(draft, frag, D):
     return draft, merged, rejected
 
 
-def cmd_merge(a):
-    """notes.py merge part1.json [part2.json ...] | --json '{"card": {...}}'  -> merged into WORK/draft.json."""
+def cmd_merge(a, quiet=False):
+    """notes.py merge part1.json [part2.json ...] | --json '{"card": {...}}'  -> merged into WORK/draft.json.
+    A part that is not valid JSON is rejected (listed under `rejected`); the other parts are still merged."""
     state = load_state(a.work)
     D = L.Doc(state["parsed_dir"])
     dp = a.draft or os.path.join(a.work, "draft.json")
     try:
         draft, rep = load_draft_file(dp)
     except DraftError as e:
-        print(json.dumps({"error": str(e), "hint": "the draft itself is broken; fix it or restore WORK/draft.bak.json"}, ensure_ascii=False))
-        sys.exit(4)
+        bak = os.path.join(os.path.dirname(dp), "draft.bak.json")
+        if not (a.parts or a.json):
+            print(json.dumps({"error": str(e), "hint": "the draft itself is broken; fix it or restore WORK/draft.bak.json"}, ensure_ascii=False))
+            sys.exit(4)
+        # parts given: start again from the last good draft (or an empty one) instead of stopping
+        try:
+            draft, rep = load_draft_file(bak)
+            rep = rep + [f"draft.json unreadable ({e}); merged onto draft.bak.json"]
+        except (DraftError, OSError):
+            draft, rep = {}, [f"draft.json unreadable ({e}); merged onto an empty draft"]
     draft, w0 = normalise_draft(draft, D)
-    frags = []
+    frags, rejected = [], []
     for p in a.parts or []:
         try:
             frags.append((p, load_draft_file(p)[0]))
-        except DraftError as e:
-            print(json.dumps({"error": str(e), "file": p, "draft_unchanged": True}, ensure_ascii=False))
-            sys.exit(4)
+        except (DraftError, OSError) as e:
+            rejected.append({"file": p, "reason": str(e), "fix": "rewrite this part file and merge/build again"})
     if a.json:
         try:
             frags.append(("--json", lenient_json(a.json, "--json")[0]))
         except DraftError as e:
-            print(json.dumps({"error": str(e), "draft_unchanged": True}, ensure_ascii=False))
-            sys.exit(4)
-    merged, rejected = [], []
+            rejected.append({"file": "--json", "reason": str(e)})
+    if not frags and rejected:
+        print(json.dumps({"error": "no part could be read; draft unchanged", "rejected": rejected}, ensure_ascii=False, indent=1))
+        sys.exit(4)
+    merged = []
     for name, fr in frags:
         if not isinstance(fr, dict):
             rejected.append({"file": name, "reason": "fragment must be a JSON object"})
@@ -1582,9 +1624,11 @@ def cmd_merge(a):
     if os.path.exists(dp):
         shutil.copyfile(dp, os.path.join(os.path.dirname(dp), "draft.bak.json"))
     atomic_dump(draft, dp)
-    print(json.dumps({"merged": merged, "rejected": rejected, "repairs": rep + w0,
-                      "draft_status": draft_status(draft, D, state.get("contract_fields") or []),
-                      "next": "notes.py build"}, ensure_ascii=False, indent=1))
+    rep_ = {"merged": merged, "rejected": rejected, "repairs": rep + w0,
+            "draft_status": draft_status(draft, D, state.get("contract_fields") or []), "next": "notes.py build"}
+    if quiet:
+        return rep_
+    print(json.dumps(rep_, ensure_ascii=False, indent=1))
 
 
 def cmd_add(a):
@@ -1659,11 +1703,30 @@ def build_failed(work, msg, code, extra=None):
 def cmd_build(a):
     work = a.work
     state = load_state(work)
+    a.merge_report = None
     dp = a.draft or os.path.join(work, "draft.json")
-    try:
-        raw, repairs = load_draft_file(dp)
-    except DraftError as e:
-        build_failed(work, str(e), 4)
+    if getattr(a, "parts", None):  # build part1.json part2.json = merge + build in one call
+        dp_merge = dp
+        if getattr(a, "dry_run", False) and os.path.exists(dp):
+            import tempfile
+            tf = tempfile.NamedTemporaryFile(suffix=".json", delete=False)
+            tf.close()
+            shutil.copyfile(dp, tf.name)
+            dp_merge = tf.name
+        try:
+            mr = cmd_merge(argparse.Namespace(work=work, draft=dp_merge, parts=a.parts, json=None), quiet=True)
+            a.merge_report = {k: mr[k] for k in ("merged", "rejected") if mr.get(k)}
+            raw, repairs = load_draft_file(dp_merge)
+        except DraftError as e:
+            build_failed(work, str(e), 4)
+        finally:
+            if dp_merge != dp and os.path.exists(dp_merge):
+                os.unlink(dp_merge)
+    else:
+        try:
+            raw, repairs = load_draft_file(dp)
+        except DraftError as e:
+            build_failed(work, str(e), 4)
     try:
         return _build(a, state, raw, repairs)
     except SystemExit:
@@ -1689,6 +1752,13 @@ def _build(a, state, raw, repairs):
     for k in L.CARD_KEYS:
         items = as_items((draft.get("card") or {}).get(k))
         card[k] = [ck.check_item(it, f"card.{k}") for it in items if (it.get("text") or "").strip()]
+    auto_filled = []
+    if not card.get("title"):
+        tb = next((b for b in D.d.get("blocks") or [] if b.get("role") == "title" and (b.get("text") or "").strip()), None)
+        if tb:
+            t_ = re.sub(r"\s+", " ", tb["text"]).strip()
+            card["title"] = [ck.check_item({"text": t_, "a": [f"{tb['id']}: {t_[:150]}"]}, "card.title")]
+            auto_filled.append("card.title")
     # sections: aligned to the paper's outline; unknown ids reported
     by_id = {}
     unknown = []
@@ -1737,9 +1807,33 @@ def _build(a, state, raw, repairs):
                     rec["status"] = "needs_review"
                     rec["review"].append(flag)
         kp_out.append(c)
+    # a note whose anchor/quote/number check FAILED is not delivered as a note: it moves to verification.dropped_items
+    # (with the reason), so no unsupported claim, number or page reaches result.json / notes.md / CSV.
+    dropped = []
+
+    def _keep(lst, where, keep_unanchored=False):
+        out_ = []
+        for it in lst:
+            ch = it.get("check") or {}
+            # an unanchored glossary entry stays visible (marked failed) so collisions/conflicts keep both sides
+            if ch.get("status") == "failed" and not (keep_unanchored and set(ch.get("problems") or []) <= {"no_anchor"}):
+                dropped.append(dict(it, where=where))
+            else:
+                out_.append(it)
+        return out_
+    for k in list(card):
+        card[k] = _keep(card[k], f"card.{k}")
+    for rec in sec_notes:
+        for f in L.SECTION_FIELDS + ["key_points"]:
+            rec[f] = _keep(rec[f], f"sections.{rec['section_id']}.{f}")
+    kp_out = _keep(kp_out, "knowledge", keep_unanchored=True)
     unreported = [u for u in draft.get("unreported") or [] if u.get("reason") and not str(u.get("reason")).startswith("e.g.")]
     unrep_fields = {str(u.get("field")).replace("card.", "") for u in unreported}
     card_missing = [k for k in L.CARD_REQUIRED if not card.get(k) and k not in unrep_fields]
+    for k in card_missing:  # recorded honestly: the notes lack it - not a claim that the paper lacks it
+        unreported.append({"field": f"card.{k}", "auto": True,
+                           "reason": "no verified note in these notes (not filled, or its note failed verification); "
+                                     "this does not claim the paper omits it - human check needed"})
     # coverage: every top-level non-reference section needs at least one note or a skip_reason
     required = [s for s in sec_notes if (s.get("level") or 1) <= 1]
     covered = [s for s in required if any(s.get(f) for f in L.SECTION_FIELDS + ["key_points"]) or s.get("skip_reason")]
@@ -1768,6 +1862,9 @@ def _build(a, state, raw, repairs):
         "draft_repairs": repairs + norm_warn,
         "supplements": [{"key": k, "file": os.path.basename((x.d.get("meta") or {}).get("source_file") or "")} for k, x in supp.items()],
         "failed_items": [r for r in recs if r["status"] == "failed"][:60],
+        "dropped_items": [{x: it.get(x) for x in ("where", "label", "text", "a", "anchors", "check") if it.get(x) is not None}
+                          for it in dropped][:60],
+        "auto_filled": auto_filled,
         "review_items": [r for r in recs if r["status"] == "needs_review"][:60],
         "machine_checkable": ["anchor exists", "quote verbatim in cited block (or relocated)", "anchor page/section",
                               "numbers in note appear in anchored text", "section coverage/order", "card fields present",
@@ -1799,9 +1896,27 @@ def _build(a, state, raw, repairs):
                          {"previous_status": prev.get("status"), "previous_items": prev_items,
                           "regression_warning": reg_msg})
     unread_vis = [v["page"] for v in vis if not v["read"]]
-    status = "success"
-    if nf or card_missing or missing or unknown or unread_vis:
-        status = "partial"
+    # status policy: `partial` only when the core notes are really missing; everything else is a warning
+    hard, warns = [], []
+    kept = sum(len(v) for v in card.values()) + sum(len(r[f]) for r in sec_notes for f in L.SECTION_FIELDS + ["key_points"])
+    if recs and not kept:
+        hard.append("no note passed verification")
+    core_missing = [k for k in CORE_CARD if k in card_missing]
+    if core_missing:
+        hard.append(f"core card fields without a verified note: {core_missing}")
+    if required and len(covered) * 2 < len(required):
+        hard.append(f"only {len(covered)}/{len(required)} top-level sections have notes")
+    if nf:
+        warns.append(f"{nf} item(s) failed verification and were left out of the notes (verification.dropped_items)")
+    if [k for k in card_missing if k not in CORE_CARD]:
+        warns.append(f"card fields recorded as not filled: {[k for k in card_missing if k not in CORE_CARD]}")
+    if missing:
+        warns.append(f"{len(missing)} top-level section(s) without notes: {missing[:6]}")
+    if unknown:
+        warns.append(f"draft section ids not in the outline (ignored): {unknown}")
+    if unread_vis:
+        warns.append(f"image-only content on pages {unread_vis} not read (listed in uncertainty)")
+    status = "partial" if hard else "success"
     if not recs:
         status = "failed"
     res = {"case_id": state.get("case_id")}
@@ -1811,7 +1926,7 @@ def _build(a, state, raw, repairs):
             res[f] = None
     res.update({
         "status": status,
-        "run_status": {"stage": "build", "reason": None,
+        "run_status": {"stage": "build", "reason": None, "warnings": warns,
                        "n_needs_review": nr, "seconds": round(time.time() - t0, 2), "tool": L.VERSION,
                        "human_takeover": "see verification.failed_items / review_items (where = field path; anchors carry page+bbox)"},
         "notes": {"paper_card": card, "section_notes": sec_notes, "knowledge_points": kp_out,
@@ -1861,43 +1976,54 @@ def _build(a, state, raw, repairs):
             res[f], cg = validate_and_coerce_contract(val, sp, f"contract.{f}")
             contract_gaps.extend(cg)
         elif v is not None:
-            walked = walk_anchors(v, ck, f"contract.{f}")
+            walked = walk_anchors(v, ck, f"contract.{f}", dropped)
             res[f], cg = validate_and_coerce_contract(walked, sp, f"contract.{f}")
             contract_gaps.extend(cg)
-        if res.get(f) in (None, [], {}) and is_req and not any(u.get("field") == f for u in res["unreported"]):
-            res["unreported"].append({"field": f, "reason": "contract field not filled by the agent (no mapping)"})
-            contract_gaps.append({"field": f, "reason": "required contract field not filled"})
+        if res.get(f) in (None, [], {}) and is_req:
+            card_ref = v[6:] if isinstance(v, str) and v.startswith("@card.") else None
+            declared = any(str(u.get("field")).replace("card.", "") in (f, card_ref) for u in res["unreported"])
+            if is_ref:  # mapped to the notes, but that part is empty: say so, do not block
+                if not declared:
+                    res["unreported"].append({"field": f, "auto": True, "reason": f"mapped to {v}, which has no verified note"})
+                warns.append(f"contract field '{f}' is empty ({v})")
+            elif not declared:
+                res["unreported"].append({"field": f, "reason": "contract field not filled by the agent (no mapping)"})
+                contract_gaps.append({"field": f, "reason": "required contract field not filled"})
     # re-count after contract literals added records
     res["verification"]["n_items"] = len(ck.records)
     res["verification"]["n_failed"] = sum(r["status"] == "failed" for r in ck.records)
     res["verification"]["n_verified"] = sum(r["status"] == "verified" for r in ck.records)
     res["verification"]["n_needs_review"] = sum(r["status"] == "needs_review" for r in ck.records)
+    res["verification"]["dropped_items"] = dropped
     res["verification"]["failed_items"] = [r for r in ck.records if r["status"] == "failed"][:60]
     res["verification"]["review_items"] = [r for r in ck.records if r["status"] == "needs_review"][:60]
+    # unfilled contract fields are hard; type/enum/nested-property coercion problems are warnings
+    hard_gaps = [g for g in contract_gaps if g["reason"] == "required contract field not filled"]
+    warns += [f"contract {g['field']}: {g['reason']}" for g in contract_gaps if g not in hard_gaps]
     res["verification"]["contract_gaps"] = contract_gaps
-    if (res["verification"]["n_failed"] or contract_gaps) and res["status"] == "success":
-        res["status"] = "partial"
-    if res["status"] != "success":
-        reasons = []
-        if res["verification"]["n_failed"]:
-            reasons.append(f"{res['verification']['n_failed']} failed items")
-        if missing:
-            reasons.append(f"{len(missing)} uncovered sections")
-        if card_missing:
-            reasons.append(f"card missing {card_missing}")
-        if unknown:
-            reasons.append(f"unknown ids {unknown}")
-        if unread_vis:
-            reasons.append(f"unread visual pages {unread_vis}")
-        if contract_gaps:
-            reasons.append(f"contract gaps: {[g['field'] for g in contract_gaps]}")
-        res["run_status"]["reason"] = "; ".join(reasons) or "partial completion"
+    if hard_gaps:
+        hard.append(f"contract fields not filled: {[g['field'] for g in hard_gaps]}")
+        if res["status"] == "success":
+            res["status"] = "partial"
+    weak_core = [k for k in L.CARD_REQUIRED if card.get(k) and all((it.get("check") or {}).get("status") == "needs_review" for it in card[k])]
+    if weak_core:
+        warns.append(f"core card fields have only needs_review evidence (check metric, direction, and comparison): {weak_core}")
+    if res["status"] == "failed":
+        res["run_status"]["reason"] = "no note items in the draft"
+    elif res["status"] == "partial":
+        res["run_status"]["reason"] = "; ".join(hard)
+    elif warns:
+        res["run_status"]["reason"] = "completed with warnings (see run_status.warnings)"
     v = res["verification"]
-    summary = {"status": res["status"], "items": v["n_items"], "verified": v["n_verified"],
+    summary = {"status": res["status"], "reason": res["run_status"]["reason"], "warnings": warns,
+               **({"merge": a.merge_report} if getattr(a, "merge_report", None) else {}),
+               "items": v["n_items"], "verified": v["n_verified"],
                "needs_review": v["n_needs_review"], "failed": v["n_failed"],
                "uncovered_sections": v["section_coverage"]["missing"], "card_missing": card_missing,
                "unknown_section_ids": unknown,
                "fix_these": [{"where": r["where"], "problems": r["problems"]} for r in v["failed_items"][:25]],
+               "next": ("optional: fix `fix_these` / `contract_gaps` in one part file and run `N build part_fix.json` once; otherwise done"
+                        if (v["n_failed"] or contract_gaps) else "done"),
                "review": [{"where": r["where"], "review": r["review"][:2]} for r in v["review_items"][:12]],
                "contract": {f: (type(res.get(f)).__name__ if res.get(f) is not None else None) for f in state["contract_fields"]},
                **({"contract_gaps": contract_gaps} if contract_gaps else {}),
@@ -2000,7 +2126,8 @@ def main():
     p.add_argument("--password", default=None)
     p.add_argument("--full-digest", action="store_true")
     p.add_argument("--force", action="store_true", help="overwrite an existing draft.json")
-    p = sub.add_parser("build")
+    p = sub.add_parser("build", help="[part.json ...] merge parts (optional), check every note, write OUT/result.json")
+    p.add_argument("parts", nargs="*")
     p.add_argument("--work", default="/app/work")
     p.add_argument("--out", default=None)
     p.add_argument("--draft", default=None)

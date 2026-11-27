@@ -1,137 +1,80 @@
 ---
 name: paper-notes
-description: Turn a research paper (PDF, or Markdown / plain text / Word .docx; optionally with supplementary files) into section-aligned, field-structured reading notes in which every key note points back to a verified place in the original (page, block, source line, table row, figure, equation, supplement). Use when a task gives a paper and asks for a literature summary, structured notes, a paper card (research question, data, method, conditions, findings, conclusion, limitations), section-by-section summaries, a knowledge-point list, or notes "with sources/evidence". Picks the primary paper among several inputs (role / key / file name), builds the paper's own outline (Chinese numbering 一、/（一）/第N章, ALL-CAPS and unnumbered headings such as Limitations, appendices), gives a reading digest with anchors and pre-checked key table rows, then checks each note against the source text - quote verbatim in the cited block, anchor inside the section it summarises, every number present in the cited text or table row (60 亿 = 6 billion, 95% = 0.95 accepted), card fields filled or declared unreported, sections covered in the paper's order, knowledge points merged with abbreviation collisions and definition conflicts reported. Notes can be written in small parts (merge/add) and a broken draft never overwrites a valid result. Handles scanned, encrypted, image-heavy, Chinese and long papers honestly.
+description: Turn a research paper (PDF, Markdown, plain text or Word .docx; optionally with supplementary files) into section-aligned, field-structured reading notes in which every key note points back to a verified place in the original (page, block, source line, table row, figure, supplement). Use when a task gives a paper and asks for a literature summary, structured notes, a paper card (research question, data, method, conditions, findings, conclusion, limitations), section summaries, a knowledge-point list, or notes "with sources/evidence". Scripts pick the primary paper, build the paper's own outline and an anchored digest, then check every note against the source (verbatim quote in the cited block, numbers present, anchor inside its section); notes that fail are kept out of the deliverable instead of blocking it. Handles scanned, encrypted, image-heavy, Chinese and long papers honestly.
 ---
 
-# paper-notes (v1.1.0)
+# paper-notes (v1.2.0)
 
-Goal: notes that **follow the paper's own structure**, **keep** research question / data / method / conditions /
-findings / conclusion / limitations, can be **found back** in the source claim by claim, and are **reusable**
-(same card fields for every paper, CSV/JSONL exports). You read and write the notes; the scripts give you the
-outline and anchors and then check your notes mechanically. Budget: ~6-12 model requests. **Save early**: init
-already writes a valid partial `result.json`, and every later step keeps a valid one.
+You write the notes; the scripts parse the paper, give you anchors, check every note and write all outputs.
+**Three steps, 3-6 requests in total.** A valid `result.json` exists from step 1 on and is never made worse.
 
-## 0. Setup (first shell call; shell state is not kept between calls)
+## Step 1 - setup + parse (one shell call)
 
 ```bash
-PY=$(command -v python3 || command -v python)
-for d in "${SKILL_DIR:-}" /skills/weekly-skill /app/submission /app/skills /app/skills/* /skills/* "$(pwd)"; do
-  [ -f "$d/scripts/notes.py" ] && SKILL_DIR="$d" && break
-done
-"$PY" "$SKILL_DIR/scripts/notes.py" init --case /input/case.json --out /app/output --work /app/work
+PY=$(command -v python3 || command -v python); for d in "${SKILL_DIR:-}" /skills/weekly-skill /app/submission /app/skills /skills/* "$(pwd)"; do [ -f "$d/scripts/notes.py" ] && SKILL_DIR="$d" && break; done
+"$PY" "$SKILL_DIR/scripts/notes.py" init --case /input/case.json --out /app/output --work /app/work && cat /app/work/digest.md
 ```
-init writes `/app/work/env.sh`. **Start every later shell call with `. /app/work/env.sh;`** - it sets `$PY`,
-`$SKILL_DIR` and the shortcut `N` = `"$PY" "$SKILL_DIR/scripts/notes.py"` (e.g. `. /app/work/env.sh; N build`).
+It prints `case_id`, `contract_fields`, `inputs` (roles: `primary`, `supplement=S1`), the paper's **outline**
+(`s4 L2 3.1 Residual Learning pp3-3`) and then the digest: the paper by section, each paragraph prefixed by its
+anchor `[p3-b12]` (text inputs: `[p1-b12 L40-44]`), plus WHERE TO LOOK, KEY TABLE ROWS (pre-checked anchors like
+`Table 2: Ours 95.3`) and VISUAL PAGES. Also read `/input/task.md` if present (language, focus).
+- Wrong primary? re-run init with `--primary FILE --force`. `parse_status: failed` (encrypted/corrupt): stop -
+  result.json already says why. Long paper: the digest shortens late paragraphs; `N find "words"` searches.
+- Later shell calls start with `. /app/work/env.sh;` (sets `N` = notes.py; e.g. `. /app/work/env.sh; N find "limitation"`).
 
-init prints `case_id`, `contract_fields`, `inputs` (each with its role: `primary`, `supplement=S1`, ...), `primary`,
-`parse_status`, the **outline** (`s4 L2 3.1 Residual Learning pp3-3`), `visual_pages` and paths. It writes
-`/app/output/result.json` (status `partial`), `/app/work/digest.md`, `cues.json`, `outline.json`, `draft.json`.
-- Inputs: `.pdf`, `.md`/`.markdown`, `.txt`, `.docx`. Primary = explicit `--primary FILE` > `role`/`type` = primary/main
-  > key name (`paper`, `main_pdf`, ...) > not supplement-like by role/key/file name (`supp`, `SI`, `appendix`, 附件, 补充)
-  > PDF > docx > md > txt. Wrong choice? re-run init with `--primary paper.docx --force`.
-- `parse_status` `failed` (e.g. `encrypted`, corrupt docx): stop; result.json already says why (`--password` only if the task gives one).
+## Step 2 - write the notes (one call, 2-3 files)
 
-## 1. Read
+Every note item is `{"text": "your note", "a": ["p3-b12: 6-25 words copied verbatim from that block"]}`
+(table: `"Table 2: row label value"`); a field holds one item or a list. Write e.g.
+- `/app/work/part_card.json`: `{"card": {...}, "unreported": [...], "contract": {...}}`
+  - card fields: `title, authors, research_question, data, method, conditions, main_findings, conclusion,
+    limitations` (+ optional `year, venue, keywords, future_work`). `conditions` = what the conclusions depend on
+    (assumptions, settings, data scope, hyper-parameters). Not in the paper -> leave it out and add
+    `{"field": "card.limitations", "reason": "no limitation stated; searched Discussion (p15-16)"}` to `unreported`.
+  - `contract`: map each `output_contract` field: `"@card"`, `"@card.<field>"`, `"@sections"`, `"@knowledge"`,
+    `"@notes_md"`, `"@evidence"`, or a literal. Obvious names map themselves; `case_id` is always filled.
+- `/app/work/part_sections.json`: `{"sections": [{"section_id": "s4", "purpose": .., "method": .., "results": ..,
+  "conclusion": .., "transition": .., "key_points": [..]}, ...]}` - one per top-level outline section (id, number
+  `"3.1"` or title accepted), anchored **inside that section**; sub-section notes count for the parent.
+- `/app/work/part_knowledge.json`: `{"knowledge": [{"term", "aliases": [..], "kind", "definition", "section_id",
+  "a": [..]}], "uncertainty": [..], "conflicts": [..]}` (conflicts: e.g. abstract vs table disagree - cite both).
 
-`task.md` / `case.json` (language, required fields, focus), then `digest.md`: the paper in reading order, grouped by
-**the paper's sections**, each paragraph prefixed by its anchor `[p3-b12]` (text inputs: `[p1-b12 L40-44]` = source lines).
-Its head lists **WHERE TO LOOK** (sections matching data / method / conditions / findings / limitations),
-**KEY TABLE ROWS** (pre-checked anchors such as `'Table 2: Ours 95.3'`) and **VISUAL PAGES**. Tables are printed
-under their section. `cues.json` = candidate sentences per card field (`strong_cue` = author-voice phrase such as
-"A limitation of this study", "trained for 90 epochs") - a shortcut, not an answer: read the sentence first.
-More: `N find "query words" [--section 3.2] [--source S1]` (paste-ready anchors);
-tables: `"$PY" "$SKILL_DIR/scripts/table_query.py" /app/output/parsed/<stem> --table "Table 2" --list`.
-Supplements: `digest_S1.md` ...; cite them with the prefix `S1::`.
+Notes in the task's language; quotes verbatim in the source language; numbers as printed (60 亿 = 6 billion,
+95% = 0.95 are accepted). Supplement facts: prefix the anchor `S1::`. Page image: `p2@x0,y0,x1,y1: what you read`.
 
-## 2. Write the notes - in parts (safer than one big file)
-
-Every note item is `{"text": "your note", "a": ["p3-b12: 6-25 words copied verbatim from that block", "Table 2: ResNet-152 4.49"]}`;
-a field holds one item or a list. Write **2-4 small JSON files** and merge them (each is validated; a bad one is
-rejected without touching the draft; `` ```json `` fences / trailing commas are repaired):
-```bash
-. /app/work/env.sh; N merge /app/work/part_card.json /app/work/part_sections.json /app/work/part_knowledge.json
-```
-- `part_card.json`: `{"card": {...}, "unreported": [...], "contract": {...}}`
-- `part_sections.json`: `{"sections": [{"section_id": "s4", "purpose": ..., "results": ...}, ...]}` (id, number `"3.1"` or title accepted)
-- `part_knowledge.json`: `{"knowledge": [...], "uncertainty": [...], "conflicts": [...]}`
-Single fixes: `N add card.limitations --text "..." --a "p9-b3: ..."` · `N add sections.3.2.results --append --text .. --a ..` ·
-`N add knowledge --term CNN --kind abbreviation --definition ".." --a ".."` · `N add unreported.card.future_work --reason ".."` ·
-`N add contract.summary --value @card`. (Editing `/app/work/draft.json` directly still works.)
-
-Content rules:
-- `card`: 13 unified fields (README *Field dictionary*). Required: title, authors, research_question, data, method,
-  conditions, main_findings, conclusion, limitations. Not in the paper -> null **and** `unreported`:
-  `{"field": "card.limitations", "reason": "no limitation stated; searched Discussion/Conclusion (p15-16)"}`.
-  `conditions` = what the conclusions depend on (assumptions, settings, data scope, hyper-parameters).
-- `sections`: one entry per outline section (paper order is restored automatically; unknown ids are reported).
-  Fill `purpose`, `method`, `results`, `conclusion` where the section has them, `transition` = link to previous/next
-  section, `key_points` = list. Anchor each item **inside that section**. Every top-level section needs a note
-  (or `"skip_reason"`); sub-section notes count for their parent.
-- `knowledge`: `{"term", "aliases": [...], "kind", "definition", "section_id", "a": [...]}`, one per concept.
-- `contract`: map **every** output_contract field: `"@card"`, `"@card.limitations"`, `"@sections"`, `"@knowledge"`,
-  `"@notes_md"`, `"@evidence"`, or a literal (objects inside may carry `"a"` anchors; checked too). Obvious names are
-  auto-mapped (`limitations` -> `@card.limitations`); `case_id` is always filled from case.json.
-- `uncertainty`, `conflicts` (e.g. abstract vs table disagree - cite both): strings or objects.
-Notes in the task's language; quotes stay verbatim in the source language. Numbers exactly as printed
-(another unit/notation is accepted: 60 亿 = 6 billion, 128 万 = 1.28 million, 95% = 0.95).
-
-## 3. Build + verify, fix, rebuild (1-2 rounds)
+## Step 3 - merge + check + write (one command)
 
 ```bash
-. /app/work/env.sh; N build            # N build --dry-run = report only, writes nothing
+. /app/work/env.sh; N build /app/work/part_card.json /app/work/part_sections.json /app/work/part_knowledge.json
 ```
-Writes `/app/output/result.json`, `notes.md`, `paper_card.json/.csv`, `knowledge_points.jsonl`, `verification.json`;
-prints `fix_these` / `review` / `uncovered_sections` / `card_missing` / `visual_pages_unread` / `knowledge_conflicts`.
-If the draft is not valid JSON, build exits 4, writes `/app/work/build_error.json` (line/column) and **leaves
-result.json untouched**; a build that verifies far fewer items than the previous one prints `regression_warning`
-(previous result kept in `/app/work/result.prev.json`).
-
-| check (item status) | meaning | action |
-|---|---|---|
-| `quote_verbatim`, `quote_in_table`, `quote_in_caption`, `equation_exists` (verified) | anchor exists, quote is in it | done |
-| `quote_in_neighbour_block` (verified) | quote is in the same paragraph/next block; anchor moved there | done |
-| `number_equivalence` (info, verified) | note number = cited number in another unit (亿/billion, %/decimal) | done |
-| `relocated` (review) | quote not in the cited block but verbatim elsewhere; anchor moved | check the claim fits the new place |
-| `quote_fuzzy` (review) | not verbatim; closest source sentence attached | copy the exact words |
-| `quote_not_found` (failed) | no such text in the source | fix quote/claim or drop it |
-| `numbers_not_in_evidence:X` (failed) | a number in the note is not in the cited block/paragraph/table row | cite where X is printed, or correct X |
-| `all anchors outside this section` (review) | a section note cites another section (or a supplement) | anchor inside the section (or accept for `transition`) |
-| `coarse_section_anchor`, `no_quote`, `table_exists`/`figure_exists` without quote | weak anchor | add a quote (table: row label + value) |
-| `figure_reading_unverified`, `image_read_unverified` | your reading of a plot / page image | stays in review (honest) |
-| `abbreviation ... mismatch / shared`, `definitions disagree` (review) | knowledge point conflicts with the paper or another entry | check; fix term/definition |
-| `source_not_found`, `bbox_off_page`, `line_not_found`, `*_not_found`, `anchor_unparseable` (failed) | bad anchor | fix format (below) |
-
-`status` = `success` only when no item failed, required card fields are filled or declared unreported, every
-top-level section is covered and every contract field is filled; else `partial` with the reason in `run_status`.
-Never edit result.json by hand to change verdicts; change the draft and rebuild.
+Writes `/app/output/result.json` (all contract fields + `case_id`), `notes.md`, `paper_card.json/.csv`,
+`knowledge_points.jsonl`, `verification.json`, and prints `status`, `reason`, `warnings`, `fix_these`.
+- A part file that is not valid JSON is listed under `merge.rejected`; the others still merge (fences and
+  trailing commas are repaired). Rewrite only that file and run the same command again.
+- A note whose quote is not in the cited block, whose number is not in the cited text, or whose anchor does not
+  exist is **left out of the notes** (kept in `verification.dropped_items`) - nothing unsupported is delivered.
+- `status: success` = core notes delivered; warnings (dropped notes, a section without notes, unread image pages,
+  type coercions) are recorded in `run_status.warnings`, not blocking. `partial` only if research_question /
+  method / main_findings have no verified note, fewer than half of the top-level sections have notes, or a
+  contract field has no mapping - `reason` says which. `failed` = unreadable input.
+- **Optional, once:** if `fix_these` lists notes you can fix (copy the exact words from the digest), write them to
+  `/app/work/part_fix.json` and run `N build /app/work/part_fix.json`. Then stop. Never edit result.json by hand.
 
 ## Anchor formats
 
-`p3-b12: verbatim words` (block, best) · `L120: words` / `L120-L131: words` (source lines, .md/.txt) · `para14: words` ·
-`Table 2` / `Table 2: row label value` (row-level check) · `Fig. 4` / `Fig. 4: caption words` · `Eq. 3` ·
-`p2@x0,y0,x1,y1: what you read` (page image / pasted figure; bbox in PDF points) · `s4` (whole section, coarse) ·
-any of these prefixed `S1::` for supplement S1. Block ids: `p{page}-b{n}`; `p{page}-m{n}` removed header/footer,
-`p{page}-g{n}` text inside a figure. `.docx` pages follow Word's page breaks (approximate); `.md` is one logical page.
+`p3-b12: words` (block, best) · `L120-L131: words` (.md/.txt lines) · `Table 2: row value` · `Fig. 4: caption
+words` · `Eq. 3` · `p2@x0,y0,x1,y1: reading` (stays needs_review) · `s4` (whole section, weak) · prefix `S1::`.
+Review-only results (`relocated`, `quote_fuzzy`, figure/page-image readings) stay in the notes marked ⚠.
 
-## Special inputs
+## Special inputs (handled by the scripts; say what is left in `uncertainty`)
 
-| Situation | What the scripts do | What you do |
-|---|---|---|
-| Several files (paper + SI / appendix / data) | primary chosen by role/key/name; others parsed as S1, S2 (digest_S1.md) | cite supplement facts with `S1::`; check init's `inputs` |
-| `.md` / `.txt` / `.docx` paper | same outline/anchor/check pipeline; line (txt/md) or paragraph (docx) locators | anchor by block or `L..` |
-| Encrypted / unreadable / corrupt | init: `status=failed`, reason in `run_status` | report; `--password PW` only if the task provides it |
-| Scanned page (no text layer, no OCR) | pseudo section `[page N, image-only page]`, page image + ink regions | look at the image; anchors `pN@bbox: text`; all such items stay `needs_review`; say so in `uncertainty` |
-| Page with little text but a large image (pasted table/plot) | `VISUAL` page: page image saved; listed in `visual_pages`; unread ones become an automatic `uncertainty` entry | open the PNG, cite `pN@bbox: what you read` (review) or state it was not read |
-| No headings detected | page-based pseudo sections (`pseudo: true`) | write notes per page; mention weak alignment in `uncertainty` |
-| Heading missed / junk heading / ToC lines | numbered, Chinese-numbered, ALL-CAPS and named (Limitations, 局限性, Appendix) lines recovered; ToC lines rejected; logged in `verification.outline_fixes` | if a gap remains, note it; anchor by block anyway |
-| Two-column / reading order | parser restores column order; anchors are per block | a quote over a column break is `quote_in_neighbour_block` |
-| Long paper (digest > 45k chars of body text) | later paragraphs shortened to first sentence | `N find`, `init --pages A-B`, or `--full-digest`; prioritise abstract, intro, method, results, conclusion |
-| Formula/figure content missing | equations by number (`Eq. N`, `transcription_status`); figures = captions only | do not invent curve values; cite caption or mark unreported |
-| Non-English / Chinese paper | CJK-aware matching; numbers in Chinese notes are checked too | quotes in the original language |
+Several files -> primary by role/key/name, others are S1, S2 (`digest_S1.md`). Scanned page -> image-only pseudo
+section; cite `pN@bbox` or state it was not read. No headings -> page-based pseudo sections. Two columns ->
+reading order restored. Equations/figures -> by number and caption only: do not invent curve values.
+Chinese / non-English -> CJK-aware matching. Encrypted -> `failed` (`--password` only if the task gives one).
 
 ## Honesty rules
 
-- No note without an anchor you have read. Unknown -> null + `unreported` with reason. Never write "not reported" as a finding.
-- A verified anchor proves the words are there, not that your paraphrase is right: keep notes close to the quote.
-- Limitations: prefer the authors' stated ones; if you add your own reading, label it ("reader's note:") and still anchor the basis.
-- Do not cite headers/footers/figure-internal text for body claims. Do not present supplement facts as main-paper facts.
+- Every note comes from text you read in the digest. Unknown -> `unreported` with a reason, never a guess.
+- Keep the paraphrase close to its quote. Your own reading of limitations: start it with "reader's note:".
+- Do not cite headers/footers for body claims; do not present supplement facts as main-paper facts.

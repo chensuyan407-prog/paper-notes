@@ -1,4 +1,4 @@
-# paper-notes — section-aligned, anchor-verified paper notes (v1.1.0)
+# paper-notes — section-aligned, anchor-verified paper notes (v1.2.0)
 
 Skill for challenge 阅读10｜文献总结与结构化笔记. Input: a paper as PDF, Markdown, plain text or Word `.docx`,
 optionally with supplementary files (+ `case.json` / `task.md`). Output: structured notes whose skeleton is the
@@ -15,7 +15,7 @@ silently mixes numbers from different tables. This skill makes each note carry a
 | path | role |
 |---|---|
 | `SKILL.md` | agent instructions (setup, workflow, anchor format, check table, special inputs) |
-| `scripts/notes.py` | CLI: `init` (pick primary + parse + outline + digest + draft + partial result), `merge` / `add` (write the draft in validated parts), `build` (resolve/check/merge/render; `--dry-run`), `find` |
+| `scripts/notes.py` | CLI: `init` (pick primary + parse + outline + digest + draft + partial result), `merge` / `add` (write the draft in validated parts), `build [part.json ...]` (merge parts, then resolve/check/render; `--dry-run`), `find` |
 | `scripts/textdoc.py` | `.md` / `.txt` / `.docx` → the same `doc.json` layout as the PDF parser (headings, tables, equations, line/paragraph locators); stdlib only |
 | `scripts/notes_lib.py` | outline repair + heading classifier, anchor resolution, quote/number/section checks, quantity equivalence, cue sentences + key table rows |
 | `scripts/parse_pdf.py`, `mathlayout.py` | layout-aware PDF parser (columns, headings, tables, equations, header/footer removal, mixed text+image pages) from pdf-evidence-reader 0.3.1 |
@@ -37,8 +37,9 @@ python scripts/notes.py init  --case /input/case.json --out /app/output --work /
 # agent: read /app/work/digest.md (+ cues.json), then write the notes in parts:
 N merge /app/work/part_card.json /app/work/part_sections.json   # validated, atomic, draft.bak.json kept
 N add card.limitations --text "..." --a "p9-b3: verbatim words" # one item (--append to add to a list)
+N build part_card.json part_sections.json part_knowledge.json   # merge + check + write in one call
 N build --dry-run                                         # report only, writes nothing
-N build                                                   # repeatable; fix what it prints, rebuild
+N build                                                   # repeatable; optional fix round: N build part_fix.json
 N find "residual mapping" --section 3 [--source S1]       # optional search, paste-ready anchors
 ```
 
@@ -116,8 +117,12 @@ N find "residual mapping" --section 3 [--source S1]       # optional search, pas
    to `conflicts`), else `definitions_agree`. A printed expansion different from the entry's long form →
    `expansion_mismatch`.
 7. **Contract mapping:** explicit `@refs` or literal values (anchors inside literals are checked), name-based
-   auto-map, unmapped → `unreported` and `partial`; `case_id` listed in the contract keeps the case's id (including
-   `0`); a failed literal anchor makes the status `partial`.
+   auto-map; unmapped → `unreported` and `partial`; mapped but empty (e.g. `@card.limitations` with no verified note)
+   → `unreported` + warning; `case_id` listed in the contract keeps the case's id (including `0`); type/enum
+   coercion problems are warnings.
+   **Status (v1.2):** a note that fails its check is moved out of the notes into `verification.dropped_items`;
+   `partial` only when research_question / method / main_findings have no verified note, fewer than half of the
+   top-level sections have notes, or a contract field is unmapped; everything else is `run_status.warnings`.
 8. **Draft safety.** `merge` / `add` write the draft in validated parts (unknown section ids / card keys rejected or
    mapped: `limitation` → `limitations`, `findings` → `main_findings`; section ids as `s4`, `3.1` or title; `note` /
    `claim` accepted for `text`, `anchors` / `evidence` / `source` for `a`); writes are atomic with `draft.bak.json`.
@@ -158,4 +163,4 @@ cells, table-of-contents lines. Expected: every perturbation gets the expected s
 
 ## Maintenance
 
-Version 1.1.0 (2026-11-25). Parser: pdf-evidence-reader 0.3.1 (same author). Issues/changes: see repository `CHANGELOG`.
+Version 1.2.0 (2026-11-27). Parser: pdf-evidence-reader 0.3.1 (same author). Issues/changes: see repository `CHANGELOG`.

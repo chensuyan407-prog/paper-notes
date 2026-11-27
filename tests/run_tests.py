@@ -155,6 +155,9 @@ def main():
         for it in v:
             if it.get("label"):
                 by_label[it["label"]] = it
+    for it in res["verification"]["dropped_items"]:  # failed notes are kept out of the notes, with their check
+        if it.get("label"):
+            by_label[it["label"]] = it
     for label, field, it, exp, prob in cases:
         got = by_label.get(label, {}).get("check", {})
         txt = json.dumps(got) + json.dumps(by_label.get(label, {}).get("anchors", []))
@@ -168,8 +171,19 @@ def main():
            [s["heading"] for s in res["notes"]["section_notes"]])
     expect("knowledge_merged", 1, len(res["notes"]["knowledge_points"]))
     expect("contract_auto_map_limitations", True, isinstance(res["limitations"], list))
-    expect("status_partial_when_failures", "partial", res["status"])
-    expect("card_missing_none_when_filled_or_failed", [], [k for k in res["verification"]["card_missing"] if k not in ("conclusion",)])
+    # v1.2: failed notes are dropped from the delivered notes and reported as warnings; core notes exist -> success
+    expect("failed_items_not_in_notes", False, any((it.get("check") or {}).get("status") == "failed"
+                                                   for v in res["notes"]["paper_card"].values() for it in v))
+    expect("status_success_with_warnings", ["success", True], [res["status"], any("failed verification" in w for w in res["run_status"]["warnings"])])
+    expect("uncovered_section_is_warning", True, any("without notes" in w for w in res["run_status"]["warnings"]))
+    with open(draft_p, "w", encoding="utf-8") as fh:  # only a fabricated note left: core notes missing -> partial
+        json.dump({"card": {"research_question": {"text": "x", "a": ["p1-b1: words that are not in the paper at all"]}}}, fh)
+    run("build", "--work", os.path.join(d, "work"))
+    rp_ = json.load(open(os.path.join(d, "output", "result.json"), encoding="utf-8"))
+    expect("status_partial_when_core_missing", "partial", rp_["status"], rp_["run_status"]["reason"])
+    expect("card_missing_none_when_filled_or_failed", [], [k for k in res["verification"]["card_missing"] if k not in ("conclusion", "limitations")])
+    # v1.2: a field whose only note failed (fabricated quote / no anchor) is recorded as not filled, not left with a ✗ note
+    expect("failed_only_field_auto_unreported", True, any(u.get("auto") and u.get("field") == "card.limitations" for u in res["unreported"]))
     for f in ("notes.md", "paper_card.csv", "knowledge_points.jsonl", "verification.json"):
         expect(f"output_{f}", True, os.path.exists(os.path.join(d, "output", f)))
 
