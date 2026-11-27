@@ -100,8 +100,9 @@ def query(doc, table, rows, col):
     if not chain:
         return {"status": "table_not_found", "table": table,
                 "available": [(x["id"], x["page"], x.get("caption")) for x in doc.get("tables", [])]}
-    def cell_is(text, v):  # a trailing footnote marker ("Baseline^a") does not change the label
-        return _n(text) == v or _n(re.sub(r"\^\S+$", "", text or "")) == v
+    def cell_is(text, v):  # a trailing footnote marker ("Baseline^a", "Baseline*", "Baseline¹") does not change the label
+        cleaned = re.sub(r"(?:\^\S+|[*†‡§¹²³⁴⁵⁶⁷⁸⁹⁰]+)$", "", text or "")
+        return _n(text) == v or _n(cleaned) == v
     all_cands = []
     for t in chain:
         cols = columns_of(t)

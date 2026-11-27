@@ -562,6 +562,12 @@ def detect_headers_footers(pages_blocks, page_heights, body_size=None, page_widt
                     b["role"], b["role_rule"] = "rotated_text", "rotated text inside the page area, not near a detected figure"
                 hf.append(b)
                 continue
+            W = page_widths[pi] if page_widths else 612
+            txt_s = b["text"].strip()
+            if txt_s.isdigit() and len(txt_s) <= 4 and (b["bbox"][2] < 0.12 * W or b["bbox"][0] > 0.88 * W):
+                b["role"], b["role_rule"] = "margin_note", "margin line number"
+                hf.append(b)
+                continue
             if not (top or bottom):
                 continue
             k = norm_key(b["text"])
@@ -1383,9 +1389,12 @@ def extract_tables(page, page_no, allow_fallback=True):
                 cells.append({"row": ri, "col": ci, "text": norm_ws(c), "colspan": colspan, "rowspan": rowspan})
         try:
             hdr = t.header
-            header = {"names": [norm_ws(x) if x else "" for x in hdr.names], "external": bool(hdr.external)}
+            names = [norm_ws(x) if x else "" for x in hdr.names]
+            header = {"names": names, "external": bool(hdr.external), "n_header_rows": 1}
         except Exception:
-            header = None
+            names = [norm_ws(c) if c else "" for c in rows[0]]
+            header = {"names": names, "external": False, "n_header_rows": 1}
+        columns = [{"index": i, "path": [n] if n else [], "name": n or f"col{i}"} for i, n in enumerate(names)]
         out.append({
             "id": None,
             "page": page_no,
@@ -1394,6 +1403,7 @@ def extract_tables(page, page_no, allow_fallback=True):
             "n_cols": ncol,
             "rows": [[norm_ws(c) if c is not None else None for c in r] for r in rows],
             "cells": cells,
+            "columns": columns,
             "header": header,
             "caption": None,
             "caption_block": None,
