@@ -48,6 +48,22 @@ def find_table(doc, spec):
     return c[0] if c else None
 
 
+def find_table_chain(doc, spec):
+    t = find_table(doc, spec)
+    if t is None:
+        return []
+    chain = [t]
+    ids = {t.get("id")}
+    for cand in doc.get("tables", []):
+        if cand is t:
+            continue
+        if cand.get("continued_from") in ids:
+            chain.append(cand)
+            if cand.get("id"):
+                ids.add(cand["id"])
+    return chain
+
+
 def columns_of(t):
     if t.get("columns"):
         return t["columns"]
@@ -80,33 +96,42 @@ def match_col_path(cols, spec):
 
 
 def query(doc, table, rows, col):
-    t = find_table(doc, table)
-    if t is None:
+    chain = find_table_chain(doc, table)
+    if not chain:
         return {"status": "table_not_found", "table": table,
                 "available": [(x["id"], x["page"], x.get("caption")) for x in doc.get("tables", [])]}
-    cols = columns_of(t)
-    nh = (t.get("header") or {}).get("n_header_rows", 1)
-    body = list(range(nh, len(t["rows"])))
-    conds = []
-    for r in rows:
-        if "=" not in r:
-            return {"status": "bad_row_condition", "condition": r}
-        k, v = r.split("=", 1)
-        kc = [c for c in cols if col_matches_key(c, k)]
-        if not kc:
-            return {"status": "row_not_found", "reason": f"no column named {k!r}", "columns": [c["name"] for c in cols],
-                    "table_id": t["id"], "page": t["page"]}
-        conds.append((kc[0]["index"], _n(v), k, v))
     def cell_is(text, v):  # a trailing footnote marker ("Baseline^a") does not change the label
         return _n(text) == v or _n(re.sub(r"\^\S+$", "", text or "")) == v
-    cand = [ri for ri in body if all(cell_is(t["rows"][ri][ci], v) for ci, v, _, _ in conds)]
+    all_cands = []
+    for t in chain:
+        cols = columns_of(t)
+        nh = (t.get("header") or {}).get("n_header_rows", 1)
+        body = list(range(nh, len(t["rows"])))
+        conds = []
+        bad_col = None
+        for r in rows:
+            if "=" not in r:
+                return {"status": "bad_row_condition", "condition": r}
+            k, v = r.split("=", 1)
+            kc = [c for c in cols if col_matches_key(c, k)]
+            if not kc:
+                bad_col = (k, cols)
+                break
+            conds.append((kc[0]["index"], _n(v), k, v))
+        if bad_col:
+            continue
+        for ri in body:
+            if all(ci < len(t["rows"][ri]) and cell_is(t["rows"][ri][ci], v) for ci, v, _, _ in conds):
+                all_cands.append((t, cols, ri))
+    t0 = chain[0]
+    base0 = {"table_id": t0["id"], "page": t0["page"], "caption": t0.get("caption")}
+    if not all_cands:
+        return dict(base0, status="row_not_found", conditions=rows)
+    if len(all_cands) > 1:
+        return dict(base0, status="row_ambiguous", conditions=rows,
+                    candidates=[[ti["rows"][ri][ci] for ci in ti.get("key_columns", [0])] for ti, _, ri in all_cands])
+    t, cols, ri = all_cands[0]
     base = {"table_id": t["id"], "page": t["page"], "caption": t.get("caption")}
-    if not cand:
-        return dict(base, status="row_not_found", conditions=rows)
-    if len(cand) > 1:
-        return dict(base, status="row_ambiguous", conditions=rows,
-                    candidates=[[t["rows"][ri][ci] for ci in t.get("key_columns", [0])] for ri in cand])
-    ri = cand[0]
     ch = match_col_path(cols, col)
     via_group = False
     if not ch:
@@ -166,15 +191,20 @@ def main():
     a = ap.parse_args()
     doc = load(a.parsed)
     if a.list:
-        t = find_table(doc, a.table)
-        if t is None:
+        chain = find_table_chain(doc, a.table)
+        if not chain:
             print(json.dumps({"status": "table_not_found"}, ensure_ascii=False))
             sys.exit(1)
-        nh = (t.get("header") or {}).get("n_header_rows", 1)
-        keys = t.get("key_columns", [0])
-        print(json.dumps({"table_id": t["id"], "page": t["page"], "caption": t.get("caption"),
-                          "columns": [c["name"] for c in columns_of(t)],
-                          "row_keys": [[t["rows"][ri][k] for k in keys] for ri in range(nh, len(t["rows"]))]},
+        t0 = chain[0]
+        row_keys = []
+        for t in chain:
+            nh = (t.get("header") or {}).get("n_header_rows", 1)
+            keys = t.get("key_columns", [0])
+            row_keys.extend([[t["rows"][ri][k] for k in keys] for ri in range(nh, len(t["rows"]))])
+        print(json.dumps({"table_id": t0["id"], "page": t0["page"], "caption": t0.get("caption"),
+                          "pages": [t["page"] for t in chain],
+                          "columns": [c["name"] for c in columns_of(t0)],
+                          "row_keys": row_keys},
                          ensure_ascii=False, indent=1))
         return
     r = query(doc, a.table, a.row, a.col or "")

@@ -38,7 +38,7 @@ try:
 except Exception:  # pragma: no cover - parsing still works without it
     mathlayout = None
 
-PARSER_VERSION = "0.3.0"
+PARSER_VERSION = "0.3.1"
 
 # ----------------------------------------------------------------- patterns
 RE_CAPTION = re.compile(
@@ -51,7 +51,9 @@ RE_HEAD_NUM = re.compile(
 RE_HEAD_ROMAN = re.compile(r"^\s*([IVX]{1,5})\.\s+([A-Z][^\n]{0,120})$")
 RE_HEAD_ALPHA = re.compile(r"^\s*([A-H])\.\s+([A-Z][^\n]{0,100})$")
 RE_HEAD_APPX = re.compile(r"^\s*([A-Z](?:\.\d+)*)\s+([A-Z][^\n]{1,120})$")
-RE_HEAD_CN = re.compile(r"^\s*(第[一二三四五六七八九十]+[章节]|[一二三四五六七八九十]+、)\s*(.{1,60})$")
+RE_HEAD_CN = re.compile(r"^\s*(第\s*[一二三四五六七八九十百\d]+\s*[章节篇]|[一二三四五六七八九十]+\s*[、．]|[（(]\s*[一二三四五六七八九十]+\s*[）)])\s*(.{1,60})$")
+RE_HEAD_NUM_CJK = re.compile(r"^\s*(\d+(?:\.\d+)+)\s*([一-鿿][^\s。，,;；：:]{1,24})$")  # '1.1数据集' (no space)
+CN_UNIT_START = set("倍个种项次年月日号万亿千百名例组篇位元度米克份层类条张台天周岁秒分时人家所")
 KNOWN_SECTIONS = re.compile(
     r"^\s*(abstract|introduction|background|related work|methods?|materials and methods|"
     r"experimental( section| details)?|results( and discussion)?|discussion|conclusions?|"
@@ -243,8 +245,11 @@ def heading_like(text):
     t = norm_ws(text)
     if not t or len(t) > 130:
         return None
-    for rx, kind in ((RE_HEAD_NUM, "numeric"), (RE_HEAD_ROMAN, "roman"), (RE_HEAD_ALPHA, "alpha"), (RE_HEAD_CN, "cn"), (RE_HEAD_APPX, "appendix")):
+    for rx, kind in ((RE_HEAD_NUM, "numeric"), (RE_HEAD_NUM_CJK, "numeric"), (RE_HEAD_ROMAN, "roman"), (RE_HEAD_ALPHA, "alpha"),
+                     (RE_HEAD_CN, "cn"), (RE_HEAD_APPX, "appendix")):
         m = rx.match(t)
+        if m and kind == "numeric" and m.group(2)[:1] in CN_UNIT_START:
+            continue  # '3.5 倍' / '2019 年' are numbers in a sentence, not headings
         if m:
             if kind in ("appendix", "named", "numeric") and re.search(r"(\.\s*){3,}\s*\d+$|\s\d{1,3}$", t) and \
                     not re.search(r"\b(19|20)\d\d$", t):
@@ -1486,6 +1491,8 @@ def classify_roles(ordered, body_size, page_heights, first_page_no):
                 continue
         hl = heading_like(t)
         short = len(b["lines"]) <= 2 and len(t) < 130
+        if hl and hl[0] == "cn" and SENT_END.search(t):
+            hl = None  # '一、...。' is a numbered sentence, not a heading
         if hl and short and (b["bold"] or b["size"] > body_size * 1.05 or hl[0] in ("named", "roman", "cn")
                              or (hl[0] == "numeric" and not SENT_END.search(t))):
             b["role"], b["role_rule"] = "heading", f"{hl[0]} heading pattern"
@@ -1514,7 +1521,7 @@ def classify_roles(ordered, body_size, page_heights, first_page_no):
         for b in ordered:
             if b["page"] != first_page_no:
                 break
-            if b["role"] in ("abstract",) or (b["role"] == "heading" and re.match(r"abstract|摘", b["text"], re.I)):
+            if b["role"] in ("abstract", "heading"):  # authors sit between the title and the abstract / first heading
                 break
             if b["role"] == "body" and b["bbox"][1] < 0.6 * page_heights[first_page_no]:
                 prev_title = any(x["role"] == "title" and x["bbox"][3] <= b["bbox"][1] + 1 for x in ordered if x["page"] == first_page_no)
@@ -1525,7 +1532,9 @@ def classify_roles(ordered, body_size, page_heights, first_page_no):
 def heading_level(h):
     if h["kind"] == "numeric":
         return h["number"].count(".") + 1
-    if h["kind"] in ("roman", "named", "cn"):
+    if h["kind"] == "cn":  # 一、 / 第N章 -> 1 ; （一） / 第N节 -> 2
+        return 2 if re.match(r"^\s*[（(]", h["number"] or "") or "节" in (h["number"] or "") else 1
+    if h["kind"] in ("roman", "named"):
         return 1
     if h["kind"] == "alpha":
         return 2
@@ -1623,8 +1632,20 @@ def parse(path, out_dir, password=None, pages=None, ocr_mode="auto", lang="eng+c
     except Exception:
         pass
     page_idx = list(range(doc.page_count))
-    if pages:
+    page_warnings = []
+    if pages is not None:
+        bad_pages = [p for p in pages if p < 1 or p > doc.page_count]
         page_idx = [p - 1 for p in pages if 1 <= p <= doc.page_count]
+        if not page_idx:
+            result = {"status": "failed", "error": "pages_out_of_range",
+                      "message": f"requested pages {pages} out of range (document has {doc.page_count} pages)",
+                      "meta": meta}
+            write_json(os.path.join(out_dir, "doc.json"), result)
+            write_json(os.path.join(out_dir, "qa_report.json"), {"status": "failed", "error": "pages_out_of_range",
+                                                                "message": result["message"]})
+            return result
+        if bad_pages:
+            page_warnings.append(f"requested pages out of range (1..{doc.page_count}): {bad_pages}")
     pages_blocks, page_info, page_heights, all_tables, figures = [], [], [], [], []
     ocr_pages, need_ocr_unresolved = [], []
     for pi in page_idx:
@@ -1660,6 +1681,22 @@ def parse(path, out_dir, password=None, pages=None, ocr_mode="auto", lang="eng+c
                     info["page_image_error"] = str(ex)
         elif g > 0.01:
             warnings.append({"page": pno, "code": "possible_garbled_text", "detail": f"garbled char ratio {g:.3f}"})
+        # mixed page: a text layer exists but a large raster image (pasted figure/table/scan fragment) carries
+        # content the text layer does not have -> keep a page image so it can be read, and say so
+        if info["source"] == "text_layer" and ((img_frac >= 0.25 and chars < 1500) or img_frac >= 0.5):
+            try:
+                big = []
+                for im in page.get_image_info():
+                    r = fitz.Rect(im["bbox"]) & page.rect
+                    if r.width * r.height >= 0.08 * W * H:
+                        big.append([round(r.x0, 1), round(r.y0, 1), round(r.x1, 1), round(r.y1, 1)])
+                rel, dpi_used, regs = page_image_and_regions(page, pno, out_dir, dpi=110)
+                info["visual_check"] = {"reason": f"large image covers {img_frac:.0%} of the page, text layer only {chars} chars",
+                                        "image": rel, "dpi": dpi_used, "image_bboxes": big[:6]}
+                warnings.append({"page": pno, "code": "sparse_text_large_image",
+                                 "detail": info["visual_check"]["reason"] + "; content inside the image is not in the text layer"})
+            except Exception as ex:  # noqa: BLE001
+                info["visual_check"] = {"reason": f"large image covers {img_frac:.0%} of the page", "error": str(ex)}
         # PyMuPDF's find_tables fallback is slow; only try it where a table caption exists
         has_tab_cap = any(re.match(r"^\s*(Table|TABLE|Tab\.|表)\s*[A-Z]?\.?\d", ln["text"]) for b in blocks for ln in b["lines"])
         info["has_equation_number"] = any(RE_EQNUM_LINE.match(ln["text"].strip()) or RE_EQ_NUM.search(ln["text"])
@@ -1933,7 +1970,7 @@ def parse(path, out_dir, password=None, pages=None, ocr_mode="auto", lang="eng+c
         "meta": meta,
         "pages_parsed": [i + 1 for i in page_idx],
         "pages_not_parsed": [i + 1 for i in range(doc.page_count) if i not in set(page_idx)],
-        "warnings": warnings,
+        "warnings": [{"code": "pages_out_of_range", "detail": w} for w in page_warnings] + warnings,
         "pages": page_info,
         "ocr_pages": ocr_pages,
         "unresolved_pages": need_ocr_unresolved,
@@ -2073,15 +2110,26 @@ def render_previews(doc, r, pdir, dpi=80):
 
 
 def parse_pages(spec):
-    if not spec:
+    if spec is None:
         return None
+    if not str(spec).strip():
+        raise ValueError("empty --pages specification")
     out = []
-    for part in spec.split(","):
+    for part in str(spec).split(","):
+        part = part.strip()
+        if not part:
+            raise ValueError(f"empty page token in '{spec}'")
         if "-" in part:
-            a, b = part.split("-")
-            out.extend(range(int(a), int(b) + 1))
+            a, b = part.split("-", 1)
+            ia, ib = int(a), int(b)
+            if ia < 1 or ib < 1 or ia > ib:
+                raise ValueError(f"invalid page range '{part}' (must satisfy 1 <= start <= end)")
+            out.extend(range(ia, ib + 1))
         else:
-            out.append(int(part))
+            p = int(part)
+            if p < 1:
+                raise ValueError(f"invalid page number '{part}' (must be >= 1)")
+            out.append(p)
     return out
 
 

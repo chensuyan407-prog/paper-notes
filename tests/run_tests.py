@@ -32,6 +32,11 @@ def run(*args):
         raise SystemExit(f"notes.py {args[0]} failed:\n{r.stdout}\n{r.stderr}")
 
 
+def read_json(directory, name="result.json"):
+    with open(os.path.join(directory, name), encoding="utf-8") as fh:
+        return json.load(fh)
+
+
 def case_dir(root, name, pdf_maker, contract):
     d = os.path.join(root, name)
     os.makedirs(os.path.join(d, "input"), exist_ok=True)
@@ -82,6 +87,10 @@ def items():
 
 
 def main():
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+    except Exception:  # noqa: BLE001
+        pass
     ap = argparse.ArgumentParser()
     ap.add_argument("--keep", default=None)
     a = ap.parse_args()
@@ -145,27 +154,51 @@ def main():
     draft["contract"] = {"paper_card": "@card", "section_notes": "@sections", "knowledge_points": "@knowledge"}
     json.dump(draft, open(draft_p, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
     run("build", "--work", os.path.join(d, "work"))
-    res = json.load(open(os.path.join(d, "output", "result.json"), encoding="utf-8"))
+    output = os.path.join(d, "output")
+    res = read_json(output)
+    ver = read_json(output, "verification.json")
+    expect("result_matches_contract", {"case_id", "paper_card", "section_notes", "knowledge_points", "limitations"}, set(res))
+    expect("init_contract_skeleton", set(res) - {"case_id"}, set(init["output_contract"]))
+    expect("init_required_dimensions", {"research_question", "method", "data", "conditions", "main_findings", "conclusion", "limitations"},
+           set(init["coverage_checklist"]))
     by_label = {}
-    for k, v in res["notes"]["paper_card"].items():
+    for k, v in res["paper_card"].items():
         for it in v:
             if it.get("label"):
                 by_label[it["label"]] = it
+    for it in ver["dropped_items"]:  # notes without a usable anchor
+        if it.get("label"):
+            by_label[it["label"]] = it
     for label, field, it, exp, prob in cases:
         got = by_label.get(label, {}).get("check", {})
         txt = json.dumps(got) + json.dumps(by_label.get(label, {}).get("anchors", []))
         expect(label, exp, got.get("status"), "" if (prob is None or prob in txt) else f"missing '{prob}'")
         if prob and prob not in txt:
             ok_all = False
-    secs = {s["heading"]: s for s in res["notes"]["section_notes"]}
+    secs = {s["heading"]: s for s in res["section_notes"]}
     expect("section_note_outside_section", "needs_review", secs["2 Method"]["results"][0]["check"]["status"])
-    expect("uncovered_section_reported", True, any("3 Results" in m for m in res["verification"]["section_coverage"]["missing"]))
+    expect("uncovered_section_reported", True, any("3 Results" in m for m in ver["section_coverage"]["missing"]))
     expect("section_order_follows_paper", ["1 Introduction", "2 Method", "2.1 Reading order", "3 Results"],
-           [s["heading"] for s in res["notes"]["section_notes"]])
-    expect("knowledge_merged", 1, len(res["notes"]["knowledge_points"]))
+           [s["heading"] for s in res["section_notes"]])
+    expect("knowledge_merged", 1, len(res["knowledge_points"]))
     expect("contract_auto_map_limitations", True, isinstance(res["limitations"], list))
-    expect("status_partial_when_failures", "partial", res["status"])
-    expect("card_missing_none_when_filled_or_failed", [], [k for k in res["verification"]["card_missing"] if k not in ("conclusion",)])
+    retained = next(it for it in res["paper_card"]["main_findings"] if it.get("label") == "wrong_number")
+    expect("weak_claim_kept_with_warning", True, bool(retained.get("warn")))
+    evidence = retained["anchors"][0]
+    expect("inline_source_location", True, bool(evidence.get("page") and evidence.get("section") and evidence.get("quote")))
+    with open(os.path.join(output, "notes.md"), encoding="utf-8") as fh:
+        expect("markdown_inline_source", True, any(evidence["quote"].replace("|", "&#124;") in line and evidence["section"] in line
+                                                   and retained["text"] in line for line in fh))
+    expect("status_success_with_warnings", ["success", True], [ver["status"], any("failed verification" in w for w in ver["run_status"]["warnings"])])
+    expect("uncovered_section_is_warning", True, any("without notes" in w for w in ver["run_status"]["warnings"]))
+    with open(draft_p, "w", encoding="utf-8") as fh:  # only a fabricated note left: no substantive notes -> partial
+        json.dump({"card": {"research_question": {"text": "x", "a": ["p1-b1: words that are not in the paper at all"]}}}, fh)
+    run("build", "--work", os.path.join(d, "work"))
+    rp_ = read_json(output, "verification.json")
+    expect("status_partial_without_substantive_notes", "partial", rp_["status"], rp_["run_status"]["reason"])
+    expect("card_missing_none_when_filled_or_failed", [], [k for k in ver["card_missing"] if k not in ("conclusion", "limitations")])
+    # v1.2: a field whose only note failed (fabricated quote / no anchor) is recorded as not filled, not left with a ✗ note
+    expect("failed_only_field_auto_unreported", True, any(u.get("auto") and u.get("field") == "card.limitations" for u in ver["unreported"]))
     for f in ("notes.md", "paper_card.csv", "knowledge_points.jsonl", "verification.json"):
         expect(f"output_{f}", True, os.path.exists(os.path.join(d, "output", f)))
 
@@ -177,7 +210,7 @@ def main():
     json.dump({"case_id": "enc", "output_contract": ["paper_card"]}, open(os.path.join(d2, "input", "case.json"), "w"))
     os.remove(os.path.join(d2, "plain.pdf"))
     run("init", "--case", os.path.join(d2, "input", "case.json"), "--out", os.path.join(d2, "output"), "--work", os.path.join(d2, "work"))
-    r2 = json.load(open(os.path.join(d2, "output", "result.json"), encoding="utf-8"))
+    r2 = read_json(os.path.join(d2, "output"), "verification.json")
     expect("encrypted_status_failed", "failed", r2["status"], r2["run_status"]["reason"])
 
     # ---------------- image-only page
@@ -190,6 +223,15 @@ def main():
     i3 = run("init", "--case", os.path.join(d3, "input", "case.json"), "--out", os.path.join(d3, "output"), "--work", os.path.join(d3, "work"))
     expect("scanned_pseudo_section", True, any("image-only" in x or "no heading" in x for x in i3["outline"]) or bool(i3["unresolved_pages"][0]) is False,
            "; ".join(i3["outline"][:2]))
+
+    # ---------------- v1.1: multi-format inputs, primary/supplement, number equivalence, knowledge, draft safety, mixed pages
+    import test_v11  # noqa: E402
+    try:
+        test_v11.main(root, expect)
+    except Exception as e:  # noqa: BLE001
+        import traceback
+        traceback.print_exc()
+        expect("v11_suite_completed", True, False, f"{type(e).__name__}: {e}")
 
     w = max(len(r[0]) for r in results)
     for r in results:
