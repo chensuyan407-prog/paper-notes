@@ -157,8 +157,11 @@ def main():
     output = os.path.join(d, "output")
     res = read_json(output)
     ver = read_json(output, "verification.json")
-    expect("result_matches_contract", {"case_id", "paper_card", "section_notes", "knowledge_points", "limitations"}, set(res))
-    expect("init_contract_skeleton", set(res) - {"case_id"}, set(init["output_contract"]))
+    # result.json = case_id + contract fields + top-level run status and its records (status, status_reason, sources, ...)
+    expect("result_matches_contract", True,
+           {"case_id", "paper_card", "section_notes", "knowledge_points", "limitations", "status", "status_reason",
+            "sources", "uncertainty", "change_log"} <= set(res))
+    expect("init_contract_skeleton", True, set(init["output_contract"]) <= set(res) and "status_reason" in res)
     expect("init_required_dimensions", {"research_question", "method", "data", "conditions", "main_findings", "conclusion", "limitations"},
            set(init["coverage_checklist"]))
     by_label = {}

@@ -52,6 +52,7 @@ notes build --work /app/work
 - Map contract fields with @card, @card.method, @sections, @knowledge, @notes_md, @evidence, or literal values.
   For a literal claim, put a beside its content so the builder can keep evidence inline.
 - If the source lacks a requested fact, leave the draft field empty and record where you searched in unreported.
+  Field text states paper content only; put process notes (parser problems, what you searched) in unreported or uncertainty.
 - If evidence is indirect or visual, keep a bounded statement and describe its uncertainty alongside the item.
 
 ## Worked example

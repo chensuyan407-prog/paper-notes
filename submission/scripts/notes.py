@@ -47,7 +47,8 @@ def dump(obj, path):
 
 
 def load(path):
-    with open(path, encoding="utf-8") as fh:
+    # utf-8-sig: case.json / draft.json written by Windows PowerShell start with a BOM, which json rejects
+    with open(path, encoding="utf-8-sig") as fh:
         return json.load(fh)
 
 
@@ -528,11 +529,17 @@ def write_env(work):
 
 def write_result(result, fields, path, diagnostics):
     """Write the case contract and keep run metadata and verification beside it."""
-    public = ({key: result.get(key) for key in dict.fromkeys(["case_id", *fields])} if fields
-              else {k: v for k, v in result.items() if k not in {"verification", "run_status", "outputs"}})
     metadata = {k: result[k] for k in ("status", "run_status", "sources", "unreported", "uncertainty",
                                         "conflicts", "change_log", "outputs") if k in result}
     atomic_dump({**diagnostics, **metadata}, os.path.join(os.path.dirname(path), "verification.json"))
+    if fields:  # the run status and its evidence/uncertainty/change records stay at the top level, beside the contract
+        core = {"case_id": result.get("case_id"), "status": result.get("status"),
+                "status_reason": (result.get("run_status") or {}).get("reason")}
+        core.update({k: result[k] for k in ("sources", "uncertainty", "conflicts", "unreported", "change_log") if k in result})
+        public = {k: v for k, v in core.items() if k not in fields}
+        public.update({key: result.get(key) for key in dict.fromkeys(["case_id", *fields])})
+    else:
+        public = {k: v for k, v in result.items() if k not in {"verification", "run_status", "outputs"}}
     atomic_dump(public, path)
 
 
@@ -726,6 +733,8 @@ def cmd_init(a):
     if supp:
         out["note"] = ("primary chosen by role/key/file name (see inputs); supplements are parsed too: cite them as "
                        "'S1::p2-b4: words'; their digests are digest_S1.md ...; use --primary FILE to override")
+    if case_err:  # exit code stays 0 (the partial result is written), but a broken case must not pass silently
+        print(f"WARNING: case input not usable: {case_err}", file=sys.stderr)
     print(json.dumps(out, ensure_ascii=False, indent=1))
 
 

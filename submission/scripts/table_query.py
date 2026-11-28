@@ -79,6 +79,8 @@ def col_matches_key(col, key):
 
 def match_col_path(cols, spec):
     parts = [_n(p) for p in spec.split("/") if p.strip()]
+    if not parts:  # no --col given: nothing can match (the caller reports col_required)
+        return []
     hits = []
     for c in cols:
         path = [_n(p) for p in c["path"]]
@@ -133,6 +135,10 @@ def query(doc, table, rows, col):
                     candidates=[[ti["rows"][ri][ci] for ci in ti.get("key_columns", [0])] for ti, _, ri in all_cands])
     t, cols, ri = all_cands[0]
     base = {"table_id": t["id"], "page": t["page"], "caption": t.get("caption")}
+    if not col.strip():  # a row alone does not name a value: say so and list the columns to choose from
+        return dict(base, status="col_required", row=ri, row_values=t["rows"][ri],
+                    columns=[c["name"] for c in cols],
+                    reason="--col is required to pick one value; use one of the listed columns")
     ch = match_col_path(cols, col)
     via_group = False
     if not ch:

@@ -113,9 +113,11 @@ ANCHOR_RE = re.compile(
 def nfkc(s):
     s = unicodedata.normalize("NFKC", s or "")
     for a, b in (("‘", "'"), ("’", "'"), ("“", '"'), ("”", '"'), ("–", "-"), ("—", "-"), ("−", "-"),
-                 ("­", ""), ("×", "x"), ("·", "."), ("…", "...")):
+                 ("­", ""), ("×", "x"), ("…", "...")):
         s = s.replace(a, b)
-    return s
+    # a middle dot is a decimal point only when glued between digits ("3·5" = 3.5); a spaced one is a
+    # multiplication sign ("10000 · 2π" must not become the number 10000.2)
+    return re.sub(r"(?<=\d)·(?=\d)", ".", s)
 
 
 def tight(s):
@@ -330,7 +332,7 @@ def split_sentences(text):
 # ---------------------------------------------------------------- doc loading
 def load_doc(parsed_dir):
     p = parsed_dir if parsed_dir.endswith(".json") else os.path.join(parsed_dir, "doc.json")
-    with open(p, encoding="utf-8") as fh:
+    with open(p, encoding="utf-8-sig") as fh:
         return json.load(fh)
 
 
@@ -820,16 +822,32 @@ class Doc:
         return dict(rec, ok=True, check="coarse_section_anchor", weak=True,
                     note="whole-section anchor: too coarse to verify a specific claim")
 
+    def _table_cite_section(self, n, caption_blocks):
+        """Section of the first running-text sentence that cites 'Table n'. A floating table sits where the
+        layout put it, which can be a neighbouring section; the sentence that discusses it names the section."""
+        pat = re.compile(rf"\bTable\s*{re.escape(str(n))}\b", re.I)
+        for bid in self.order:
+            b = self.blocks[bid]
+            if bid in caption_blocks or b.get("role") in ("table", "reference", "references"):
+                continue
+            if b.get("section_id") and pat.search(b.get("text") or ""):
+                return b["section_id"]
+        return None
+
     def _res_table(self, rec, n, quote):
         chain = self.table_chains.get(n) or ([self.tables[n]] if n in self.tables else [])
         if not chain:
             return dict(rec, ok=False, check="table_not_found", known=sorted(self.tables))
         t0 = chain[0]
         cb = t0.get("caption_block")
-        sid = self.blocks.get(cb, {}).get("section_id") if cb else None
+        layout_sid = self.blocks.get(cb, {}).get("section_id") if cb else None
+        cite_sid = self._table_cite_section(n, {t.get("caption_block") for t in chain})
+        sid = cite_sid or layout_sid
         rec.update(table=f"Table {n}", table_id=t0.get("id"), page=t0.get("page"), bbox=t0.get("bbox"),
                    caption=(t0.get("caption") or "")[:200], caption_block=cb, section_id=sid,
                    section=self.sec_by_id.get(sid, {}).get("path"))
+        if layout_sid and layout_sid != sid:
+            rec.update(layout_section_id=layout_sid, section_source="in-text citation (layout placed the table elsewhere)")
         if not quote:
             return dict(rec, ok=True, check="table_exists")
         tq = tight(quote)
@@ -841,7 +859,7 @@ class Doc:
                 hits = [r for r in rows if toks and all(tk in tight(r) for tk in toks)]
             if hits:
                 tcb = t.get("caption_block") or cb
-                tsid = self.blocks.get(tcb, {}).get("section_id") if tcb else sid
+                tsid = cite_sid or (self.blocks.get(tcb, {}).get("section_id") if tcb else sid)
                 return dict(rec, ok=True, check="quote_in_table", matched_rows=hits[:3],
                             table_id=t.get("id"), page=t.get("page"), bbox=t.get("bbox"),
                             caption=(t.get("caption") or "")[:200], section_id=tsid,
